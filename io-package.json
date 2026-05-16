@@ -26,6 +26,7 @@
     "readyToRun": true,
     "mode": "daemon",
     "platform": "Javascript/Node.js",
+    "messagebox": true,
     "adminUI": {
       "config": "html"
     }
