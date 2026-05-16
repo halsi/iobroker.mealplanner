@@ -130,35 +130,36 @@ html, body {
     color: #f9a825;
 }
 
+.mp-col-cat {
+    width: 90px;
+    padding: 0 10px;
+    font-size: 12px;
+    color: var(--mp-day-fg);
+    white-space: nowrap;
+    text-transform: capitalize;
+}
+
+.mp-col-rand {
+    width: 44px;
+    text-align: center;
+    padding: 0 4px;
+}
+
 .mp-col-main,
 .mp-col-side {
     cursor: pointer;
-}
-
-/* Category background colors on Hauptspeise column */
-.mp-col-main.cat-vegetarisch { background: var(--mp-cat-vegetarisch); }
-.mp-col-main.cat-fisch       { background: var(--mp-cat-fisch); }
-.mp-col-main.cat-fleisch     { background: var(--mp-cat-fleisch); }
-.mp-col-main.cat-extern      { background: var(--mp-cat-extern); }
-.mp-col-main.cat-event       { background: var(--mp-cat-event); }
-.mp-col-main.cat-leer        { background: var(--mp-cat-leer); }
-
-.mp-vis-table tr.mp-today .mp-col-main,
-.mp-vis-table tr.mp-today .mp-col-side {
-    background: var(--mp-today-bg) !important;
+    padding: 0 12px;
 }
 
 /* ── Cell inner layout ─────────────────────────────────────────────────────── */
-.mp-cell {
-    display: flex;
-    align-items: center;
+.mp-col-main,
+.mp-col-side {
     min-height: 52px;
-    padding: 6px 8px 6px 12px;
-    gap: 6px;
+    height: 52px;
 }
 
 .mp-cell-name {
-    flex: 1;
+    display: block;
     font-size: 14px;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -170,13 +171,13 @@ html, body {
     font-style: italic;
 }
 
-.mp-cell:hover .mp-cell-name:not(.empty) {
+.mp-col-main:hover .mp-cell-name:not(.empty),
+.mp-col-side:hover .mp-cell-name:not(.empty) {
     text-decoration: underline;
 }
 
 /* ── Random button ─────────────────────────────────────────────────────────── */
 .mp-btn-rand {
-    flex-shrink: 0;
     width: 36px;
     height: 36px;
     border: none;
