@@ -613,6 +613,12 @@ class MealplannerAdapter extends utils.Adapter {
                 break;
             }
 
+            case 'sortAndSave': {
+                this.saveDb();
+                this.sendTo(obj.from, obj.command, { result: 'ok' }, obj.callback);
+                break;
+            }
+
             case 'importSides': {
                 const csv = (obj.message && obj.message.csv) || '';
                 const lines = csv.split('\n').map(l => l.trim()).filter(l => l && !l.startsWith('name'));
