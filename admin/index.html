@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Essensplaner</title>
+    <link rel="stylesheet" href="../../lib/css/adapter.css">
+    <link rel="stylesheet" href="style.css">
+    <script src="../../lib/js/socket.io.js"></script>
+    <script src="../../lib/js/translate.js"></script>
+    <script src="words.js"></script>
+</head>
+<body>
+
+<div id="mp-root">
+
+    <!-- Tab bar -->
+    <nav class="mp-tabs">
+        <div class="mp-tab active" data-panel="mp-panel-planner">Wochenplaner</div>
+        <div class="mp-tab" data-panel="mp-panel-dishes">Gerichte</div>
+        <div class="mp-tab" data-panel="mp-panel-sides">Beilagen</div>
+        <div class="mp-tab" data-panel="mp-panel-ie">Import/Export</div>
+    </nav>
+
+    <!-- ── Tab: Wochenplaner ───────────────────────────────────────────────── -->
+    <div id="mp-panel-planner" class="mp-panel active">
+
+        <div class="mp-section">
+            <div class="mp-section-title">
+                Diese Woche &nbsp;<span id="mp-table-current-kw" style="font-weight:normal;font-size:13px;color:#757575"></span>
+            </div>
+            <div style="overflow-x:auto">
+                <table id="mp-table-current" class="mp-week-table">
+                    <tbody><tr><td colspan="6" class="mp-loading">Lade...</td></tr></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="mp-section">
+            <div class="mp-section-title">
+                Nächste Woche &nbsp;<span id="mp-table-next-kw" style="font-weight:normal;font-size:13px;color:#757575"></span>
+            </div>
+            <div style="overflow-x:auto">
+                <table id="mp-table-next" class="mp-week-table">
+                    <tbody><tr><td colspan="6" class="mp-loading">Lade...</td></tr></tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ── Tab: Gerichte ──────────────────────────────────────────────────── -->
+    <div id="mp-panel-dishes" class="mp-panel">
+
+        <div class="mp-toolbar">
+            <button class="mp-btn mp-btn-primary" onclick="mpEditDish(null)">
+                &#xFF0B; Gericht hinzufügen
+            </button>
+        </div>
+
+        <table class="mp-db-table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th style="width:120px">Kategorie</th>
+                    <th style="width:80px">Rezept</th>
+                    <th style="width:80px">Portionen</th>
+                    <th style="width:80px"></th>
+                </tr>
+            </thead>
+            <tbody id="mp-dishes-tbody">
+                <tr><td colspan="5" class="mp-loading">Lade...</td></tr>
+            </tbody>
+        </table>
+
+    </div>
+
+    <!-- ── Tab: Beilagen ──────────────────────────────────────────────────── -->
+    <div id="mp-panel-sides" class="mp-panel">
+
+        <div class="mp-toolbar">
+            <button class="mp-btn mp-btn-primary" onclick="mpEditSide(null)">
+                &#xFF0B; Beilage hinzufügen
+            </button>
+        </div>
+
+        <table class="mp-db-table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th style="width:80px">Rezept</th>
+                    <th style="width:80px">Portionen</th>
+                    <th style="width:80px"></th>
+                </tr>
+            </thead>
+            <tbody id="mp-sides-tbody">
+                <tr><td colspan="4" class="mp-loading">Lade...</td></tr>
+            </tbody>
+        </table>
+
+    </div>
+
+    <!-- ── Tab: Import/Export ─────────────────────────────────────────────── -->
+    <div id="mp-panel-ie" class="mp-panel">
+
+        <div class="mp-ie-section">
+
+            <div class="mp-section">
+                <h3 class="mp-section-title">CSV Export</h3>
+                <p style="color:#616161;margin:0 0 12px 0;font-size:13px">
+                    Exportiert den Wochenplan der aktuellen und nächsten Woche als CSV-Datei.<br>
+                    Format: <code>kw;wochentag;hauptspeise;beilage;typ;notiz</code>
+                </p>
+                <button class="mp-btn mp-btn-primary" onclick="mpDoExport()">
+                    &#x21E9; CSV exportieren
+                </button>
+            </div>
+
+            <div class="mp-section">
+                <h3 class="mp-section-title">CSV Import</h3>
+                <p style="color:#616161;margin:0 0 8px 0;font-size:13px">
+                    CSV-Daten einfügen und importieren. Gerichte und Beilagen müssen in der Datenbank vorhanden sein.
+                </p>
+                <div class="mp-form-row">
+                    <label for="mp-csv-area">CSV-Daten</label>
+                    <textarea id="mp-csv-area" class="mp-csv-area"
+                        placeholder="kw;wochentag;hauptspeise;beilage;typ;notiz&#10;20;Montag;Pasta Bolognese;Salat;normal;&#10;20;Dienstag;..."></textarea>
+                </div>
+                <div class="mp-toolbar">
+                    <button class="mp-btn mp-btn-primary" onclick="mpDoImport()">
+                        &#x21E7; Importieren
+                    </button>
+                    <button class="mp-btn mp-btn-secondary" onclick="document.getElementById('mp-csv-area').value=''">
+                        Leeren
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+</div><!-- #mp-root -->
+
+<!-- ── Modal: Gericht bearbeiten ──────────────────────────────────────────── -->
+<div id="mp-dish-modal" class="mp-modal-overlay">
+    <div class="mp-modal">
+        <h3 id="mp-dish-modal-title">Gericht bearbeiten</h3>
+        <input type="hidden" id="mp-dish-id">
+
+        <div class="mp-form-row">
+            <label for="mp-dish-name">Name *</label>
+            <input type="text" id="mp-dish-name" placeholder="z.B. Pasta Bolognese"
+                onkeydown="if(event.key==='Enter') mpSaveDish()">
+        </div>
+
+        <div class="mp-form-row">
+            <label for="mp-dish-cat">Kategorie</label>
+            <select id="mp-dish-cat">
+                <option value="">— keine Kategorie —</option>
+                <option value="vegetarisch">Vegetarisch</option>
+                <option value="fisch">Fisch</option>
+                <option value="fleisch">Fleisch</option>
+                <option value="extern">Auswärts</option>
+                <option value="event">Event</option>
+            </select>
+        </div>
+
+        <div class="mp-form-row">
+            <label for="mp-dish-url">Rezept URL</label>
+            <input type="url" id="mp-dish-url" placeholder="https://...">
+        </div>
+
+        <div class="mp-form-row">
+            <label for="mp-dish-port">Portionen</label>
+            <input type="number" id="mp-dish-port" value="2" min="1" max="20" style="width:80px">
+        </div>
+
+        <div class="mp-modal-footer">
+            <button class="mp-btn mp-btn-secondary" onclick="mpCloseDishModal()">Abbrechen</button>
+            <button class="mp-btn mp-btn-primary" onclick="mpSaveDish()">Speichern</button>
+        </div>
+    </div>
+</div>
+
+<!-- ── Modal: Beilage bearbeiten ──────────────────────────────────────────── -->
+<div id="mp-side-modal" class="mp-modal-overlay">
+    <div class="mp-modal">
+        <h3 id="mp-side-modal-title">Beilage bearbeiten</h3>
+        <input type="hidden" id="mp-side-id">
+
+        <div class="mp-form-row">
+            <label for="mp-side-name">Name *</label>
+            <input type="text" id="mp-side-name" placeholder="z.B. Nudeln, Reis, Salat"
+                onkeydown="if(event.key==='Enter') mpSaveSide()">
+        </div>
+
+        <div class="mp-form-row">
+            <label for="mp-side-url">Rezept URL</label>
+            <input type="url" id="mp-side-url" placeholder="https://...">
+        </div>
+
+        <div class="mp-form-row">
+            <label for="mp-side-port">Portionen</label>
+            <input type="number" id="mp-side-port" value="2" min="1" max="20" style="width:80px">
+        </div>
+
+        <div class="mp-modal-footer">
+            <button class="mp-btn mp-btn-secondary" onclick="mpCloseSideModal()">Abbrechen</button>
+            <button class="mp-btn mp-btn-primary" onclick="mpSaveSide()">Speichern</button>
+        </div>
+    </div>
+</div>
+
+<script src="mealplanner.js"></script>
+<script>
+    // ioBroker admin integration
+    var socket;
+    var instance;
+    var systemLang = 'de';
+
+    document.addEventListener('DOMContentLoaded', function () {
+        // Standard ioBroker admin pattern
+        if (typeof io !== 'undefined') {
+            socket = io.connect();
+            socket.on('connect', function () {
+                socket.emit('getVersion', function (version) {
+                    console.log('Connected to ioBroker, version: ' + version);
+                });
+            });
+        } else {
+            // Fallback for development / standalone preview
+            console.warn('socket.io not available — running in standalone mode');
+            socket = {
+                emit: function (event, adapter, cmd, msg, cb) {
+                    console.log('[socket.emit]', event, adapter, cmd, msg);
+                    if (cb) cb({ result: [] });
+                }
+            };
+        }
+
+        // Read instance number from URL (?instance=0)
+        var urlParams = new URLSearchParams(window.location.search);
+        instance = urlParams.get('instance') || '0';
+
+        // Kick off
+        mpInit();
+    });
+
+    // translateAll is provided by translate.js (ioBroker)
+    if (typeof translateAll === 'function') {
+        document.addEventListener('DOMContentLoaded', function () {
+            translateAll();
+        });
+    }
+</script>
+
+</body>
+</html>

@@ -1,0 +1,445 @@
+/* iobroker.mealplanner admin styles */
+
+/* ── Layout ──────────────────────────────────────────────────────────────── */
+
+#mp-root {
+    font-family: Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-size: 14px;
+    color: #212121;
+    padding: 0;
+    margin: 0;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+/* ── Tabs ─────────────────────────────────────────────────────────────────── */
+
+.mp-tabs {
+    display: flex;
+    border-bottom: 2px solid #e0e0e0;
+    background: #fff;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.mp-tab {
+    padding: 12px 24px;
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    margin-bottom: -2px;
+    font-weight: 500;
+    color: #757575;
+    transition: color 0.2s, border-color 0.2s;
+    user-select: none;
+    white-space: nowrap;
+}
+
+.mp-tab:hover {
+    color: #1565c0;
+    background: #f5f5f5;
+}
+
+.mp-tab.active {
+    color: #1565c0;
+    border-bottom-color: #1565c0;
+}
+
+/* ── Tab panels ───────────────────────────────────────────────────────────── */
+
+.mp-panel {
+    display: none;
+    padding: 20px;
+    flex: 1;
+    overflow-y: auto;
+}
+
+.mp-panel.active {
+    display: block;
+}
+
+/* ── Section headings ─────────────────────────────────────────────────────── */
+
+.mp-section-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #1565c0;
+    margin: 0 0 12px 0;
+    padding-bottom: 6px;
+    border-bottom: 1px solid #e3f2fd;
+}
+
+.mp-section {
+    margin-bottom: 32px;
+}
+
+/* ── Week plan table ──────────────────────────────────────────────────────── */
+
+.mp-week-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 8px;
+    table-layout: fixed;
+}
+
+.mp-week-table th {
+    background: #e3f2fd;
+    padding: 8px 10px;
+    text-align: left;
+    font-weight: 600;
+    color: #1565c0;
+    border-bottom: 2px solid #90caf9;
+    font-size: 13px;
+}
+
+.mp-week-table td {
+    padding: 6px 8px;
+    border-bottom: 1px solid #f0f0f0;
+    vertical-align: middle;
+}
+
+.mp-week-table tr:hover td {
+    background: #fafafa;
+}
+
+.mp-week-table tr.today td {
+    background: #fffde7;
+    font-weight: 600;
+}
+
+.mp-week-table td:first-child {
+    font-weight: 500;
+    width: 90px;
+    color: #424242;
+}
+
+.mp-week-table select,
+.mp-week-table input[type="text"] {
+    width: 100%;
+    padding: 4px 6px;
+    border: 1px solid #e0e0e0;
+    border-radius: 3px;
+    font-size: 13px;
+    background: #fff;
+    box-sizing: border-box;
+    transition: border-color 0.15s;
+}
+
+.mp-week-table select:focus,
+.mp-week-table input[type="text"]:focus {
+    outline: none;
+    border-color: #1565c0;
+}
+
+.mp-week-table td.col-action {
+    width: 44px;
+    text-align: center;
+}
+
+/* Columns widths */
+.mp-week-table .col-day   { width: 90px; }
+.mp-week-table .col-main  { width: 22%; }
+.mp-week-table .col-side  { width: 18%; }
+.mp-week-table .col-type  { width: 110px; }
+.mp-week-table .col-note  { }
+.mp-week-table .col-action{ width: 44px; }
+
+/* ── Buttons ──────────────────────────────────────────────────────────────── */
+
+.mp-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 16px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
+    transition: background 0.15s, box-shadow 0.15s;
+    text-decoration: none;
+}
+
+.mp-btn:active {
+    box-shadow: none;
+}
+
+.mp-btn-primary {
+    background: #1565c0;
+    color: #fff;
+}
+
+.mp-btn-primary:hover {
+    background: #0d47a1;
+    box-shadow: 0 2px 6px rgba(21,101,192,0.3);
+}
+
+.mp-btn-secondary {
+    background: #e0e0e0;
+    color: #424242;
+}
+
+.mp-btn-secondary:hover {
+    background: #bdbdbd;
+}
+
+.mp-btn-danger {
+    background: #c62828;
+    color: #fff;
+}
+
+.mp-btn-danger:hover {
+    background: #b71c1c;
+}
+
+.mp-btn-icon {
+    padding: 5px 8px;
+    font-size: 16px;
+    line-height: 1;
+    background: transparent;
+    color: #757575;
+    border: 1px solid transparent;
+    border-radius: 4px;
+}
+
+.mp-btn-icon:hover {
+    background: #f5f5f5;
+    color: #1565c0;
+    border-color: #e0e0e0;
+}
+
+.mp-btn-icon.danger:hover {
+    color: #c62828;
+}
+
+/* ── Toolbar ──────────────────────────────────────────────────────────────── */
+
+.mp-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 14px;
+}
+
+/* ── Database tables (Gerichte / Beilagen) ────────────────────────────────── */
+
+.mp-db-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.mp-db-table th {
+    background: #e3f2fd;
+    padding: 8px 12px;
+    text-align: left;
+    font-weight: 600;
+    color: #1565c0;
+    border-bottom: 2px solid #90caf9;
+    font-size: 13px;
+}
+
+.mp-db-table td {
+    padding: 7px 12px;
+    border-bottom: 1px solid #f0f0f0;
+    vertical-align: middle;
+}
+
+.mp-db-table tr:hover td {
+    background: #fafafa;
+}
+
+.mp-db-table td.col-actions {
+    white-space: nowrap;
+    width: 80px;
+    text-align: right;
+}
+
+.mp-db-table .mp-tag {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 11px;
+    font-weight: 600;
+    background: #e3f2fd;
+    color: #1565c0;
+}
+
+.mp-tag.vegetarisch { background: #e8f5e9; color: #2e7d32; }
+.mp-tag.fisch       { background: #e3f2fd; color: #0277bd; }
+.mp-tag.fleisch     { background: #fce4ec; color: #c62828; }
+.mp-tag.extern      { background: #fff8e1; color: #f57f17; }
+.mp-tag.event       { background: #f3e5f5; color: #6a1b9a; }
+
+/* ── Modal ────────────────────────────────────────────────────────────────── */
+
+.mp-modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.45);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+}
+
+.mp-modal-overlay.open {
+    display: flex;
+}
+
+.mp-modal {
+    background: #fff;
+    border-radius: 6px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+    width: 480px;
+    max-width: 95vw;
+    max-height: 90vh;
+    overflow-y: auto;
+    padding: 24px;
+}
+
+.mp-modal h3 {
+    margin: 0 0 20px 0;
+    font-size: 17px;
+    color: #1565c0;
+}
+
+.mp-modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 24px;
+}
+
+/* ── Form ─────────────────────────────────────────────────────────────────── */
+
+.mp-form-row {
+    margin-bottom: 14px;
+}
+
+.mp-form-row label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    color: #757575;
+    margin-bottom: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+}
+
+.mp-form-row input[type="text"],
+.mp-form-row input[type="url"],
+.mp-form-row input[type="number"],
+.mp-form-row select,
+.mp-form-row textarea {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+    font-size: 14px;
+    box-sizing: border-box;
+    transition: border-color 0.15s;
+    font-family: inherit;
+}
+
+.mp-form-row input:focus,
+.mp-form-row select:focus,
+.mp-form-row textarea:focus {
+    outline: none;
+    border-color: #1565c0;
+}
+
+.mp-form-row textarea {
+    resize: vertical;
+    min-height: 80px;
+}
+
+/* ── Import/Export panel ──────────────────────────────────────────────────── */
+
+.mp-ie-section {
+    max-width: 700px;
+}
+
+.mp-ie-section h3 {
+    font-size: 15px;
+    font-weight: 600;
+    color: #424242;
+    margin: 0 0 8px 0;
+}
+
+.mp-csv-area {
+    width: 100%;
+    min-height: 180px;
+    font-family: "Roboto Mono", "Courier New", monospace;
+    font-size: 12px;
+    padding: 10px;
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+    box-sizing: border-box;
+    resize: vertical;
+    background: #fafafa;
+}
+
+.mp-csv-area:focus {
+    outline: none;
+    border-color: #1565c0;
+    background: #fff;
+}
+
+.mp-ie-meta {
+    font-size: 12px;
+    color: #9e9e9e;
+    margin-top: 6px;
+}
+
+/* ── Toast notifications ──────────────────────────────────────────────────── */
+
+.mp-toast {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(60px);
+    background: #323232;
+    color: #fff;
+    padding: 10px 20px;
+    border-radius: 4px;
+    font-size: 13px;
+    z-index: 2000;
+    transition: transform 0.25s ease;
+    pointer-events: none;
+    white-space: nowrap;
+}
+
+.mp-toast.show {
+    transform: translateX(-50%) translateY(0);
+}
+
+.mp-toast.error {
+    background: #c62828;
+}
+
+/* ── Empty state ──────────────────────────────────────────────────────────── */
+
+.mp-empty {
+    text-align: center;
+    padding: 32px;
+    color: #9e9e9e;
+    font-style: italic;
+}
+
+/* ── Loading spinner ──────────────────────────────────────────────────────── */
+
+.mp-loading {
+    text-align: center;
+    padding: 24px;
+    color: #9e9e9e;
+}
+
+/* ── Responsive tweak ─────────────────────────────────────────────────────── */
+
+@media (max-width: 700px) {
+    .mp-tabs { overflow-x: auto; }
+    .mp-tab  { padding: 10px 14px; font-size: 13px; }
+    .mp-panel{ padding: 12px; }
+    .mp-week-table .col-note { display: none; }
+}

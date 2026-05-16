@@ -1,0 +1,717 @@
+{
+  "common": {
+    "name": "mealplanner",
+    "version": "0.1.0",
+    "news": {
+      "0.1.0": {
+        "en": "Initial release",
+        "de": "Erste Version"
+      }
+    },
+    "title": "Essensplaner",
+    "titleLang": {
+      "en": "Meal Planner",
+      "de": "Essensplaner"
+    },
+    "desc": {
+      "en": "Meal planner adapter for two people — weekly planning, dish database, CSV import/export",
+      "de": "Essensplaner-Adapter für zwei Personen — Wochenplanung, Gerichtsdatenbank, CSV Import/Export"
+    },
+    "authors": ["Wolfgang Halbartschlager"],
+    "keywords": ["meal", "planner", "essensplan", "kochen", "wochenplan"],
+    "license": "MIT",
+    "type": "general",
+    "main": "main.js",
+    "enabled": true,
+    "readyToRun": true,
+    "mode": "daemon",
+    "platform": "Javascript/Node.js",
+    "adminUI": {
+      "config": "json"
+    }
+  },
+  "native": {
+    "persons": 2
+  },
+  "objects": [],
+  "instanceObjects": [
+    {
+      "_id": "week.current.Montag.main",
+      "type": "state",
+      "common": { "name": "Montag Hauptspeise ID (diese Woche)", "type": "string", "role": "text", "read": true, "write": true, "def": "" },
+      "native": {}
+    },
+    {
+      "_id": "week.current.Montag.main_name",
+      "type": "state",
+      "common": { "name": "Montag Hauptspeise Name (diese Woche)", "type": "string", "role": "text", "read": true, "write": true, "def": "" },
+      "native": {}
+    },
+    {
+      "_id": "week.current.Montag.side",
+      "type": "state",
+      "common": { "name": "Montag Beilage ID (diese Woche)", "type": "string", "role": "text", "read": true, "write": true, "def": "" },
+      "native": {}
+    },
+    {
+      "_id": "week.current.Montag.side_name",
+      "type": "state",
+      "common": { "name": "Montag Beilage Name (diese Woche)", "type": "string", "role": "text", "read": true, "write": true, "def": "" },
+      "native": {}
+    },
+    {
+      "_id": "week.current.Montag.category",
+      "type": "state",
+      "common": { "name": "Montag Kategorie (diese Woche)", "type": "string", "role": "text", "read": true, "write": true, "def": "" },
+      "native": {}
+    },
+    {
+      "_id": "week.current.Montag.type",
+      "type": "state",
+      "common": { "name": "Montag Typ (diese Woche)", "type": "string", "role": "text", "read": true, "write": true, "def": "normal" },
+      "native": {}
+    },
+    {
+      "_id": "week.current.Montag.note",
+      "type": "state",
+      "common": { "name": "Montag Notiz (diese Woche)", "type": "string", "role": "text", "read": true, "write": true, "def": "" },
+      "native": {}
+    },
+    {
+      "_id": "week.current.Dienstag.main",
+      "type": "state",
+      "common": { "name": "Dienstag Hauptspeise ID (diese Woche)", "type": "string", "role": "text", "read": true, "write": true, "def": "" },
+      "native": {}
+    },
+    {
+      "_id": "week.current.Dienstag.main_name",
+      "type": "state",
+      "common": { "name": "Dienstag Hauptspeise Name (diese Woche)", "type": "string", "role": "text", "read": true, "write": true, "def": "" },
+      "native": {}
+    },
+    {
+      "_id": "week.current.Dienstag.side",
+      "type": "state",
+      "common": { "name": "Dienstag Beilage ID (diese Woche)", "type": "string", "role": "text", "read": true, "write": true, "def": "" },
+      "native": {}
+    },
+    {
+      "_id": "week.current.Dienstag.side_name",
+      "type": "state",
+      "common": { "name": "Dienstag Beilage Name (diese Woche)", "type": "string", "role": "text", "read": true, "write": true, "def": "" },
+      "native": {}
+    },
+    {
+      "_id": "week.current.Dienstag.category",
+      "type": "state",
+      "common": { "name": "Dienstag Kategorie (diese Woche)", "type": "string", "role": "text", "read": true, "write": true, "def": "" },
+      "native": {}
+    },
+    {
+      "_id": "week.current.Dienstag.type",
+      "type": "state",
+      "common": { "name": "Dienstag Typ (diese Woche)", "type": "string", "role": "text", "read": true, "write": true, "def": "normal" },
+      "native": {}
+    },
+    {
+      "_id": "week.current.Dienstag.note",
+      "type": "state",
+      "common": { "name": "Dienstag Notiz (diese Woche)", "type": "string", "role": "text", "read": true, "write": true, "def": "" },
+      "native": {}
+    },
+    {
+      "_id": "week.current.Mittwoch.main",
+      "type": "state",
+      "common": { "name": "Mittwoch Hauptspeise ID (diese Woche)", "type": "string", "role": "text", "read": true, "write": true, "def": "" },
+      "native": {}
+    },
+    {
+      "_id": "week.current.Mittwoch.main_name",
+      "type": "state",
+      "common": { "name": "Mittwoch Hauptspeise Name (diese Woche)", "type": "string", "role": "text", "read": true, "write": true, "def": "" },
+      "native": {}
+    },
+    {
+      "_id": "week.current.Mittwoch.side",
+      "type": "state",
+      "common": { "name": "Mittwoch Beilage ID (diese Woche)", "type": "string", "role": "text", "read": true, "write": true, "def": "" },
+      "native": {}
+    },
+    {
+      "_id": "week.current.Mittwoch.side_name",
+      "type": "state",
+      "common": { "name": "Mittwoch Beilage Name (diese Woche)", "type": "string", "role": "text", "read": true, "write": true, "def": "" },
+      "native": {}
+    },
+    {
+      "_id": "week.current.Mittwoch.category",
+      "type": "state",
+      "common": { "name": "Mittwoch Kategorie (diese Woche)", "type": "string", "role": "text", "read": true, "write": true, "def": "" },
+      "native": {}
+    },
+    {
+      "_id": "week.current.Mittwoch.type",
+      "type": "state",
+      "common": { "name": "Mittwoch Typ (diese Woche)", "type": "string", "role": "text", "read": true, "write": true, "def": "normal" },
+      "native": {}
+    },
+    {
+      "_id": "week.current.Mittwoch.note",
+      "type": "state",
+      "common": { "name": "Mittwoch Notiz (diese Woche)", "type": "string", "role": "text", "read": true, "write": true, "def": "" },
+      "native": {}
+    },
+    {
+      "_id": "week.current.Donnerstag.main",
+      "type": "state",
+      "common": { "name": "Donnerstag Hauptspeise ID (diese Woche)", "type": "string", "role": "text", "read": true, "write": true, "def": "" },
+      "native": {}
+    },
+    {
+      "_id": "week.current.Donnerstag.main_name",
+      "type": "state",
+      "common": { "name": "Donnerstag Hauptspeise Name (diese Woche)", "type": "string", "role": "text", "read": true, "write": true, "def": "" },
+      "native": {}
+    },
+    {
+      "_id": "week.current.Donnerstag.side",
+      "type": "state",
+      "common": { "name": "Donnerstag Beilage ID (diese Woche)", "type": "string", "role": "text", "read": true, "write": true, "def": "" },
+      "native": {}
+    },
+    {
+      "_id": "week.current.Donnerstag.side_name",
+      "type": "state",
+      "common": { "name": "Donnerstag Beilage Name (diese Woche)", "type": "string", "role": "text", "read": true, "write": true, "def": "" },
+      "native": {}
+    },
+    {
+      "_id": "week.current.Donnerstag.category",
+      "type": "state",
+      "common": { "name": "Donnerstag Kategorie (diese Woche)", "type": "string", "role": "text", "read": true, "write": true, "def": "" },
+      "native": {}
+    },
+    {
+      "_id": "week.current.Donnerstag.type",
+      "type": "state",
+      "common": { "name": "Donnerstag Typ (diese Woche)", "type": "string", "role": "text", "read": true, "write": true, "def": "normal" },
+      "native": {}
+    },
+    {
+      "_id": "week.current.Donnerstag.note",
+      "type": "state",
+      "common": { "name": "Donnerstag Notiz (diese Woche)", "type": "string", "role": "text", "read": true, "write": true, "def": "" },
+      "native": {}
+    },
+    {
+      "_id": "week.current.Freitag.main",
+      "type": "state",
+      "common": { "name": "Freitag Hauptspeise ID (diese Woche)", "type": "string", "role": "text", "read": true, "write": true, "def": "" },
+      "native": {}
+    },
+    {
+      "_id": "week.current.Freitag.main_name",
+      "type": "state",
+      "common": { "name": "Freitag Hauptspeise Name (diese Woche)", "type": "string", "role": "text", "read": true, "write": true, "def": "" },
+      "native": {}
+    },
+    {
+      "_id": "week.current.Freitag.side",
+      "type": "state",
+      "common": { "name": "Freitag Beilage ID (diese Woche)", "type": "string", "role": "text", "read": true, "write": true, "def": "" },
+      "native": {}
+    },
+    {
+      "_id": "week.current.Freitag.side_name",
+      "type": "state",
+      "common": { "name": "Freitag Beilage Name (diese Woche)", "type": "string", "role": "text", "read": true, "write": true, "def": "" },
+      "native": {}
+    },
+    {
+      "_id": "week.current.Freitag.category",
+      "type": "state",
+      "common": { "name": "Freitag Kategorie (diese Woche)", "type": "string", "role": "text", "read": true, "write": true, "def": "" },
+      "native": {}
+    },
+    {
+      "_id": "week.current.Freitag.type",
+      "type": "state",
+      "common": { "name": "Freitag Typ (diese Woche)", "type": "string", "role": "text", "read": true, "write": true, "def": "normal" },
+      "native": {}
+    },
+    {
+      "_id": "week.current.Freitag.note",
+      "type": "state",
+      "common": { "name": "Freitag Notiz (diese Woche)", "type": "string", "role": "text", "read": true, "write": true, "def": "" },
+      "native": {}
+    },
+    {
+      "_id": "week.current.Samstag.main",
+      "type": "state",
+      "common": { "name": "Samstag Hauptspeise ID (diese Woche)", "type": "string", "role": "text", "read": true, "write": true, "def": "" },
+      "native": {}
+    },
+    {
+      "_id": "week.current.Samstag.main_name",
+      "type": "state",
+      "common": { "name": "Samstag Hauptspeise Name (diese Woche)", "type": "string", "role": "text", "read": true, "write": true, "def": "" },
+      "native": {}
+    },
+    {
+      "_id": "week.current.Samstag.side",
+      "type": "state",
+      "common": { "name": "Samstag Beilage ID (diese Woche)", "type": "string", "role": "text", "read": true, "write": true, "def": "" },
+      "native": {}
+    },
+    {
+      "_id": "week.current.Samstag.side_name",
+      "type": "state",
+      "common": { "name": "Samstag Beilage Name (diese Woche)", "type": "string", "role": "text", "read": true, "write": true, "def": "" },
+      "native": {}
+    },
+    {
+      "_id": "week.current.Samstag.category",
+      "type": "state",
+      "common": { "name": "Samstag Kategorie (diese Woche)", "type": "string", "role": "text", "read": true, "write": true, "def": "" },
+      "native": {}
+    },
+    {
+      "_id": "week.current.Samstag.type",
+      "type": "state",
+      "common": { "name": "Samstag Typ (diese Woche)", "type": "string", "role": "text", "read": true, "write": true, "def": "normal" },
+      "native": {}
+    },
+    {
+      "_id": "week.current.Samstag.note",
+      "type": "state",
+      "common": { "name": "Samstag Notiz (diese Woche)", "type": "string", "role": "text", "read": true, "write": true, "def": "" },
+      "native": {}
+    },
+    {
+      "_id": "week.current.Sonntag.main",
+      "type": "state",
+      "common": { "name": "Sonntag Hauptspeise ID (diese Woche)", "type": "string", "role": "text", "read": true, "write": true, "def": "" },
+      "native": {}
+    },
+    {
+      "_id": "week.current.Sonntag.main_name",
+      "type": "state",
+      "common": { "name": "Sonntag Hauptspeise Name (diese Woche)", "type": "string", "role": "text", "read": true, "write": true, "def": "" },
+      "native": {}
+    },
+    {
+      "_id": "week.current.Sonntag.side",
+      "type": "state",
+      "common": { "name": "Sonntag Beilage ID (diese Woche)", "type": "string", "role": "text", "read": true, "write": true, "def": "" },
+      "native": {}
+    },
+    {
+      "_id": "week.current.Sonntag.side_name",
+      "type": "state",
+      "common": { "name": "Sonntag Beilage Name (diese Woche)", "type": "string", "role": "text", "read": true, "write": true, "def": "" },
+      "native": {}
+    },
+    {
+      "_id": "week.current.Sonntag.category",
+      "type": "state",
+      "common": { "name": "Sonntag Kategorie (diese Woche)", "type": "string", "role": "text", "read": true, "write": true, "def": "" },
+      "native": {}
+    },
+    {
+      "_id": "week.current.Sonntag.type",
+      "type": "state",
+      "common": { "name": "Sonntag Typ (diese Woche)", "type": "string", "role": "text", "read": true, "write": true, "def": "normal" },
+      "native": {}
+    },
+    {
+      "_id": "week.current.Sonntag.note",
+      "type": "state",
+      "common": { "name": "Sonntag Notiz (diese Woche)", "type": "string", "role": "text", "read": true, "write": true, "def": "" },
+      "native": {}
+    },
+    {
+      "_id": "week.next.Montag.main",
+      "type": "state",
+      "common": { "name": "Montag Hauptspeise ID (nächste Woche)", "type": "string", "role": "text", "read": true, "write": true, "def": "" },
+      "native": {}
+    },
+    {
+      "_id": "week.next.Montag.main_name",
+      "type": "state",
+      "common": { "name": "Montag Hauptspeise Name (nächste Woche)", "type": "string", "role": "text", "read": true, "write": true, "def": "" },
+      "native": {}
+    },
+    {
+      "_id": "week.next.Montag.side",
+      "type": "state",
+      "common": { "name": "Montag Beilage ID (nächste Woche)", "type": "string", "role": "text", "read": true, "write": true, "def": "" },
+      "native": {}
+    },
+    {
+      "_id": "week.next.Montag.side_name",
+      "type": "state",
+      "common": { "name": "Montag Beilage Name (nächste Woche)", "type": "string", "role": "text", "read": true, "write": true, "def": "" },
+      "native": {}
+    },
+    {
+      "_id": "week.next.Montag.category",
+      "type": "state",
+      "common": { "name": "Montag Kategorie (nächste Woche)", "type": "string", "role": "text", "read": true, "write": true, "def": "" },
+      "native": {}
+    },
+    {
+      "_id": "week.next.Montag.type",
+      "type": "state",
+      "common": { "name": "Montag Typ (nächste Woche)", "type": "string", "role": "text", "read": true, "write": true, "def": "normal" },
+      "native": {}
+    },
+    {
+      "_id": "week.next.Montag.note",
+      "type": "state",
+      "common": { "name": "Montag Notiz (nächste Woche)", "type": "string", "role": "text", "read": true, "write": true, "def": "" },
+      "native": {}
+    },
+    {
+      "_id": "week.next.Dienstag.main",
+      "type": "state",
+      "common": { "name": "Dienstag Hauptspeise ID (nächste Woche)", "type": "string", "role": "text", "read": true, "write": true, "def": "" },
+      "native": {}
+    },
+    {
+      "_id": "week.next.Dienstag.main_name",
+      "type": "state",
+      "common": { "name": "Dienstag Hauptspeise Name (nächste Woche)", "type": "string", "role": "text", "read": true, "write": true, "def": "" },
+      "native": {}
+    },
+    {
+      "_id": "week.next.Dienstag.side",
+      "type": "state",
+      "common": { "name": "Dienstag Beilage ID (nächste Woche)", "type": "string", "role": "text", "read": true, "write": true, "def": "" },
+      "native": {}
+    },
+    {
+      "_id": "week.next.Dienstag.side_name",
+      "type": "state",
+      "common": { "name": "Dienstag Beilage Name (nächste Woche)", "type": "string", "role": "text", "read": true, "write": true, "def": "" },
+      "native": {}
+    },
+    {
+      "_id": "week.next.Dienstag.category",
+      "type": "state",
+      "common": { "name": "Dienstag Kategorie (nächste Woche)", "type": "string", "role": "text", "read": true, "write": true, "def": "" },
+      "native": {}
+    },
+    {
+      "_id": "week.next.Dienstag.type",
+      "type": "state",
+      "common": { "name": "Dienstag Typ (nächste Woche)", "type": "string", "role": "text", "read": true, "write": true, "def": "normal" },
+      "native": {}
+    },
+    {
+      "_id": "week.next.Dienstag.note",
+      "type": "state",
+      "common": { "name": "Dienstag Notiz (nächste Woche)", "type": "string", "role": "text", "read": true, "write": true, "def": "" },
+      "native": {}
+    },
+    {
+      "_id": "week.next.Mittwoch.main",
+      "type": "state",
+      "common": { "name": "Mittwoch Hauptspeise ID (nächste Woche)", "type": "string", "role": "text", "read": true, "write": true, "def": "" },
+      "native": {}
+    },
+    {
+      "_id": "week.next.Mittwoch.main_name",
+      "type": "state",
+      "common": { "name": "Mittwoch Hauptspeise Name (nächste Woche)", "type": "string", "role": "text", "read": true, "write": true, "def": "" },
+      "native": {}
+    },
+    {
+      "_id": "week.next.Mittwoch.side",
+      "type": "state",
+      "common": { "name": "Mittwoch Beilage ID (nächste Woche)", "type": "string", "role": "text", "read": true, "write": true, "def": "" },
+      "native": {}
+    },
+    {
+      "_id": "week.next.Mittwoch.side_name",
+      "type": "state",
+      "common": { "name": "Mittwoch Beilage Name (nächste Woche)", "type": "string", "role": "text", "read": true, "write": true, "def": "" },
+      "native": {}
+    },
+    {
+      "_id": "week.next.Mittwoch.category",
+      "type": "state",
+      "common": { "name": "Mittwoch Kategorie (nächste Woche)", "type": "string", "role": "text", "read": true, "write": true, "def": "" },
+      "native": {}
+    },
+    {
+      "_id": "week.next.Mittwoch.type",
+      "type": "state",
+      "common": { "name": "Mittwoch Typ (nächste Woche)", "type": "string", "role": "text", "read": true, "write": true, "def": "normal" },
+      "native": {}
+    },
+    {
+      "_id": "week.next.Mittwoch.note",
+      "type": "state",
+      "common": { "name": "Mittwoch Notiz (nächste Woche)", "type": "string", "role": "text", "read": true, "write": true, "def": "" },
+      "native": {}
+    },
+    {
+      "_id": "week.next.Donnerstag.main",
+      "type": "state",
+      "common": { "name": "Donnerstag Hauptspeise ID (nächste Woche)", "type": "string", "role": "text", "read": true, "write": true, "def": "" },
+      "native": {}
+    },
+    {
+      "_id": "week.next.Donnerstag.main_name",
+      "type": "state",
+      "common": { "name": "Donnerstag Hauptspeise Name (nächste Woche)", "type": "string", "role": "text", "read": true, "write": true, "def": "" },
+      "native": {}
+    },
+    {
+      "_id": "week.next.Donnerstag.side",
+      "type": "state",
+      "common": { "name": "Donnerstag Beilage ID (nächste Woche)", "type": "string", "role": "text", "read": true, "write": true, "def": "" },
+      "native": {}
+    },
+    {
+      "_id": "week.next.Donnerstag.side_name",
+      "type": "state",
+      "common": { "name": "Donnerstag Beilage Name (nächste Woche)", "type": "string", "role": "text", "read": true, "write": true, "def": "" },
+      "native": {}
+    },
+    {
+      "_id": "week.next.Donnerstag.category",
+      "type": "state",
+      "common": { "name": "Donnerstag Kategorie (nächste Woche)", "type": "string", "role": "text", "read": true, "write": true, "def": "" },
+      "native": {}
+    },
+    {
+      "_id": "week.next.Donnerstag.type",
+      "type": "state",
+      "common": { "name": "Donnerstag Typ (nächste Woche)", "type": "string", "role": "text", "read": true, "write": true, "def": "normal" },
+      "native": {}
+    },
+    {
+      "_id": "week.next.Donnerstag.note",
+      "type": "state",
+      "common": { "name": "Donnerstag Notiz (nächste Woche)", "type": "string", "role": "text", "read": true, "write": true, "def": "" },
+      "native": {}
+    },
+    {
+      "_id": "week.next.Freitag.main",
+      "type": "state",
+      "common": { "name": "Freitag Hauptspeise ID (nächste Woche)", "type": "string", "role": "text", "read": true, "write": true, "def": "" },
+      "native": {}
+    },
+    {
+      "_id": "week.next.Freitag.main_name",
+      "type": "state",
+      "common": { "name": "Freitag Hauptspeise Name (nächste Woche)", "type": "string", "role": "text", "read": true, "write": true, "def": "" },
+      "native": {}
+    },
+    {
+      "_id": "week.next.Freitag.side",
+      "type": "state",
+      "common": { "name": "Freitag Beilage ID (nächste Woche)", "type": "string", "role": "text", "read": true, "write": true, "def": "" },
+      "native": {}
+    },
+    {
+      "_id": "week.next.Freitag.side_name",
+      "type": "state",
+      "common": { "name": "Freitag Beilage Name (nächste Woche)", "type": "string", "role": "text", "read": true, "write": true, "def": "" },
+      "native": {}
+    },
+    {
+      "_id": "week.next.Freitag.category",
+      "type": "state",
+      "common": { "name": "Freitag Kategorie (nächste Woche)", "type": "string", "role": "text", "read": true, "write": true, "def": "" },
+      "native": {}
+    },
+    {
+      "_id": "week.next.Freitag.type",
+      "type": "state",
+      "common": { "name": "Freitag Typ (nächste Woche)", "type": "string", "role": "text", "read": true, "write": true, "def": "normal" },
+      "native": {}
+    },
+    {
+      "_id": "week.next.Freitag.note",
+      "type": "state",
+      "common": { "name": "Freitag Notiz (nächste Woche)", "type": "string", "role": "text", "read": true, "write": true, "def": "" },
+      "native": {}
+    },
+    {
+      "_id": "week.next.Samstag.main",
+      "type": "state",
+      "common": { "name": "Samstag Hauptspeise ID (nächste Woche)", "type": "string", "role": "text", "read": true, "write": true, "def": "" },
+      "native": {}
+    },
+    {
+      "_id": "week.next.Samstag.main_name",
+      "type": "state",
+      "common": { "name": "Samstag Hauptspeise Name (nächste Woche)", "type": "string", "role": "text", "read": true, "write": true, "def": "" },
+      "native": {}
+    },
+    {
+      "_id": "week.next.Samstag.side",
+      "type": "state",
+      "common": { "name": "Samstag Beilage ID (nächste Woche)", "type": "string", "role": "text", "read": true, "write": true, "def": "" },
+      "native": {}
+    },
+    {
+      "_id": "week.next.Samstag.side_name",
+      "type": "state",
+      "common": { "name": "Samstag Beilage Name (nächste Woche)", "type": "string", "role": "text", "read": true, "write": true, "def": "" },
+      "native": {}
+    },
+    {
+      "_id": "week.next.Samstag.category",
+      "type": "state",
+      "common": { "name": "Samstag Kategorie (nächste Woche)", "type": "string", "role": "text", "read": true, "write": true, "def": "" },
+      "native": {}
+    },
+    {
+      "_id": "week.next.Samstag.type",
+      "type": "state",
+      "common": { "name": "Samstag Typ (nächste Woche)", "type": "string", "role": "text", "read": true, "write": true, "def": "normal" },
+      "native": {}
+    },
+    {
+      "_id": "week.next.Samstag.note",
+      "type": "state",
+      "common": { "name": "Samstag Notiz (nächste Woche)", "type": "string", "role": "text", "read": true, "write": true, "def": "" },
+      "native": {}
+    },
+    {
+      "_id": "week.next.Sonntag.main",
+      "type": "state",
+      "common": { "name": "Sonntag Hauptspeise ID (nächste Woche)", "type": "string", "role": "text", "read": true, "write": true, "def": "" },
+      "native": {}
+    },
+    {
+      "_id": "week.next.Sonntag.main_name",
+      "type": "state",
+      "common": { "name": "Sonntag Hauptspeise Name (nächste Woche)", "type": "string", "role": "text", "read": true, "write": true, "def": "" },
+      "native": {}
+    },
+    {
+      "_id": "week.next.Sonntag.side",
+      "type": "state",
+      "common": { "name": "Sonntag Beilage ID (nächste Woche)", "type": "string", "role": "text", "read": true, "write": true, "def": "" },
+      "native": {}
+    },
+    {
+      "_id": "week.next.Sonntag.side_name",
+      "type": "state",
+      "common": { "name": "Sonntag Beilage Name (nächste Woche)", "type": "string", "role": "text", "read": true, "write": true, "def": "" },
+      "native": {}
+    },
+    {
+      "_id": "week.next.Sonntag.category",
+      "type": "state",
+      "common": { "name": "Sonntag Kategorie (nächste Woche)", "type": "string", "role": "text", "read": true, "write": true, "def": "" },
+      "native": {}
+    },
+    {
+      "_id": "week.next.Sonntag.type",
+      "type": "state",
+      "common": { "name": "Sonntag Typ (nächste Woche)", "type": "string", "role": "text", "read": true, "write": true, "def": "normal" },
+      "native": {}
+    },
+    {
+      "_id": "week.next.Sonntag.note",
+      "type": "state",
+      "common": { "name": "Sonntag Notiz (nächste Woche)", "type": "string", "role": "text", "read": true, "write": true, "def": "" },
+      "native": {}
+    },
+    {
+      "_id": "today.main",
+      "type": "state",
+      "common": { "name": "Heute Hauptspeise ID", "type": "string", "role": "text", "read": true, "write": false, "def": "" },
+      "native": {}
+    },
+    {
+      "_id": "today.main_name",
+      "type": "state",
+      "common": { "name": "Heute Hauptspeise Name", "type": "string", "role": "text", "read": true, "write": false, "def": "" },
+      "native": {}
+    },
+    {
+      "_id": "today.side",
+      "type": "state",
+      "common": { "name": "Heute Beilage ID", "type": "string", "role": "text", "read": true, "write": false, "def": "" },
+      "native": {}
+    },
+    {
+      "_id": "today.side_name",
+      "type": "state",
+      "common": { "name": "Heute Beilage Name", "type": "string", "role": "text", "read": true, "write": false, "def": "" },
+      "native": {}
+    },
+    {
+      "_id": "today.category",
+      "type": "state",
+      "common": { "name": "Heute Kategorie", "type": "string", "role": "text", "read": true, "write": false, "def": "" },
+      "native": {}
+    },
+    {
+      "_id": "today.type",
+      "type": "state",
+      "common": { "name": "Heute Typ", "type": "string", "role": "text", "read": true, "write": false, "def": "normal" },
+      "native": {}
+    },
+    {
+      "_id": "today.note",
+      "type": "state",
+      "common": { "name": "Heute Notiz", "type": "string", "role": "text", "read": true, "write": false, "def": "" },
+      "native": {}
+    },
+    {
+      "_id": "cmd.suggest",
+      "type": "state",
+      "common": { "name": "Zufallsvorschlag für heute auslösen", "type": "boolean", "role": "button", "read": false, "write": true, "def": false },
+      "native": {}
+    },
+    {
+      "_id": "cmd.export",
+      "type": "state",
+      "common": { "name": "CSV Export auslösen", "type": "boolean", "role": "button", "read": false, "write": true, "def": false },
+      "native": {}
+    },
+    {
+      "_id": "cmd.import",
+      "type": "state",
+      "common": { "name": "CSV Daten importieren", "type": "string", "role": "text", "read": false, "write": true, "def": "" },
+      "native": {}
+    },
+    {
+      "_id": "info.current_kw",
+      "type": "state",
+      "common": { "name": "Aktuelle Kalenderwoche", "type": "number", "role": "value", "read": true, "write": false, "def": 0 },
+      "native": {}
+    },
+    {
+      "_id": "info.next_kw",
+      "type": "state",
+      "common": { "name": "Nächste Kalenderwoche", "type": "number", "role": "value", "read": true, "write": false, "def": 0 },
+      "native": {}
+    },
+    {
+      "_id": "info.db_dishes",
+      "type": "state",
+      "common": { "name": "Anzahl Gerichte in Datenbank", "type": "number", "role": "value", "read": true, "write": false, "def": 0 },
+      "native": {}
+    },
+    {
+      "_id": "info.db_sides",
+      "type": "state",
+      "common": { "name": "Anzahl Beilagen in Datenbank", "type": "number", "role": "value", "read": true, "write": false, "def": 0 },
+      "native": {}
+    },
+    {
+      "_id": "info.last_export",
+      "type": "state",
+      "common": { "name": "Zeitpunkt des letzten Exports", "type": "string", "role": "text", "read": true, "write": false, "def": "" },
+      "native": {}
+    }
+  ]
+}

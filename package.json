@@ -1,0 +1,14 @@
+{
+  "name": "iobroker.mealplanner",
+  "version": "0.1.0",
+  "description": "Essensplaner Adapter für ioBroker",
+  "main": "main.js",
+  "scripts": {
+    "start": "node main.js"
+  },
+  "dependencies": {
+    "@iobroker/adapter-core": "^3.0.0"
+  },
+  "author": "Wolfgang Halbartschlager",
+  "license": "MIT"
+}
