@@ -116,7 +116,8 @@ function renderWeek(weekLabel, tableId, headerId, label) {
         html += `
         <tr class="${isToday ? 'mp-today' : ''}" data-week="${weekLabel}" data-day="${esc(day)}">
             <td class="mp-col-day">${esc(day)}</td>
-            <td class="mp-col-cat">${esc(cat)}</td>
+            <td class="mp-col-cat" style="cursor:pointer" title="Kategorie filtern"
+                onclick="mpOpenPicker('${weekLabel}','${esc(day)}','main','${esc(cat)}')">${esc(cat)}</td>
             <td class="mp-col-main" onclick="mpOpenPicker('${weekLabel}','${esc(day)}','main')">
                 <span class="mp-cell-name${mainDish ? '' : ' empty'}">${
                     mainDish ? esc(mainDish.name) : '— kein Gericht —'
@@ -172,19 +173,32 @@ function saveEntry(week, day, field, id) {
 }
 
 // ─── Picker ───────────────────────────────────────────────────────────────────
-function mpOpenPicker(week, day, field) {
-    pickerCtx = { week, day, field };
+function mpOpenPicker(week, day, field, catFilter) {
     const isSide = field === 'side';
-    const items  = isSide ? db.sides : db.dishes;
+    const activeCat = (!isSide && catFilter) ? catFilter : null;
+    pickerCtx = { week, day, field, catFilter: activeCat };
+
+    const allItems = isSide ? db.sides : db.dishes;
+    const items    = activeCat ? allItems.filter(d => d.kategorie === activeCat) : allItems;
+
     const overlay = document.getElementById('mp-picker-overlay');
     const list    = document.getElementById('mp-picker-list');
     const search  = document.getElementById('mp-picker-search');
 
     search.value = '';
 
-    let html = `
+    let html = '';
+
+    if (activeCat) {
+        html += `
+        <div class="mp-picker-item mp-picker-all" onclick="mpOpenPicker('${esc(week)}','${esc(day)}','${esc(field)}','')">
+            ☰ &nbsp;Alle Gerichte anzeigen
+        </div>`;
+    }
+
+    html += `
         <div class="mp-picker-item mp-picker-random" onclick="mpPickRandom()">
-            ↻ &nbsp;Zufällig
+            ↻ &nbsp;Zufällig${activeCat ? ' aus ' + esc(activeCat) : ''}
         </div>
         <div class="mp-picker-item mp-picker-clear" onclick="mpPickItem(null)">
             — ${isSide ? 'keine Beilage' : 'kein Gericht'} —
@@ -222,7 +236,10 @@ function mpPickItem(id) {
 
 function mpPickRandom() {
     if (!pickerCtx) return;
-    const list = pickerCtx.field === 'main' ? db.dishes : db.sides;
+    const all  = pickerCtx.field === 'main' ? db.dishes : db.sides;
+    const list = (pickerCtx.catFilter && pickerCtx.field === 'main')
+        ? all.filter(d => d.kategorie === pickerCtx.catFilter)
+        : all;
     if (!list.length) { mpClosePicker(); return; }
     const pick = list[Math.floor(Math.random() * list.length)];
     mpPickItem(pick.id);
