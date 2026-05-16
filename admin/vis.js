@@ -232,11 +232,10 @@ function mpClosePicker(e) {
     pickerCtx = null;
 }
 
-// ─── Week toggle ──────────────────────────────────────────────────────────────
-function mpSetWeek(week) {
-    document.getElementById('mp-block-current').style.display = week === 'current' ? '' : 'none';
-    document.getElementById('mp-block-next').style.display    = week === 'next'    ? '' : 'none';
-    document.querySelectorAll('.mp-nav-btn').forEach(btn => {
-        btn.classList.toggle('active', btn.dataset.week === week);
-    });
-}
+// ─── Week via URL param (?week=now|next) ─────────────────────────────────────
+(function () {
+    const showNext = new URLSearchParams(location.search).get('week') === 'next';
+    document.getElementById('mp-block-current').style.display = showNext ? 'none' : '';
+    document.getElementById('mp-block-next').style.display    = showNext ? ''     : 'none';
+    document.getElementById(showNext ? 'mp-btn-next' : 'mp-btn-now').classList.add('active');
+})();

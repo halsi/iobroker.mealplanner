@@ -9,8 +9,8 @@
 <body>
 
 <div id="mp-nav">
-    <button class="mp-nav-btn active" data-week="current" onclick="mpSetWeek('current')">Diese Woche</button>
-    <button class="mp-nav-btn" data-week="next" onclick="mpSetWeek('next')">Nächste Woche</button>
+    <button id="mp-btn-now"  class="mp-nav-btn" onclick="location.href='?week=now'">Diese Woche</button>
+    <button id="mp-btn-next" class="mp-nav-btn" onclick="location.href='?week=next'">Nächste Woche</button>
 </div>
 
 <div id="mp-vis">
@@ -20,7 +20,7 @@
         <table class="mp-vis-table" id="mp-tbl-current"></table>
     </div>
 
-    <div class="mp-week-block" id="mp-block-next" style="display:none">
+    <div class="mp-week-block" id="mp-block-next">
         <div class="mp-week-header" id="mp-kw-next">KW — · Nächste Woche</div>
         <table class="mp-vis-table" id="mp-tbl-next"></table>
     </div>
