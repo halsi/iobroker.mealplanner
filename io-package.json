@@ -27,7 +27,7 @@
     "mode": "daemon",
     "platform": "Javascript/Node.js",
     "adminUI": {
-      "config": "json"
+      "config": "html"
     }
   },
   "native": {
