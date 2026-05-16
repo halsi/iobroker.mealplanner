@@ -24,15 +24,13 @@
     "authors": ["Wolfgang Halbartschlager"],
     "keywords": ["meal", "planner", "essensplan", "kochen", "wochenplan"],
     "license": "MIT",
-    "type": "visualization-widgets",
+    "type": "general",
     "main": "main.js",
     "enabled": true,
     "readyToRun": true,
     "mode": "daemon",
     "platform": "Javascript/Node.js",
     "messagebox": true,
-    "dependencies": [{"vis": "*"}],
-    "restartAdapters": ["vis"],
     "adminUI": {
       "config": "html"
     }
