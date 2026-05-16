@@ -182,20 +182,6 @@ function render() {
 
 let _pickerDay = null;
 let _pickerWeekKey = null;
-let _dirty = false;
-
-function markDirty() {
-    _dirty = true;
-    const btn = document.getElementById('mp-save-btn');
-    if (btn) btn.style.display = '';
-}
-
-function savePlanExplicit() {
-    savePlan();
-    _dirty = false;
-    const btn = document.getElementById('mp-save-btn');
-    if (btn) btn.style.display = 'none';
-}
 
 function hidePicker() {
     const el = document.getElementById('mp-picker');
@@ -281,7 +267,7 @@ function openCatPicker(e, day) {
                     const dish = db.dishes.find(d => d.id === entry.hauptspeise_id);
                     if (dish && dish.kategorie !== c.name) entry.hauptspeise_id = '';
                 }
-                markDirty();
+                savePlan();
                 render();
             }));
         });
@@ -317,7 +303,7 @@ function openDishPicker(e, day) {
                 const entry2 = dayEntry(day);
                 entry2.hauptspeise_id = d.id;
                 if (!entry2.kategorie && d.kategorie) entry2.kategorie = d.kategorie;
-                markDirty();
+                savePlan();
                 render();
             }));
         });
@@ -345,7 +331,7 @@ function openSidePicker(e, day) {
             el.appendChild(pickerBtn(s.name, null, () => {
                 const entry = dayEntry(day);
                 entry.beilage_id = s.id;
-                markDirty();
+                savePlan();
                 render();
             }));
         });
