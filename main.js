@@ -99,6 +99,15 @@ class MealplannerAdapter extends utils.Adapter {
     // ─── Adapter lifecycle ───────────────────────────────────────────────────────
 
     async onReady() {
+        // Ensure VIS discovers this adapter's widget set
+        try {
+            await this.extendForeignObjectAsync('system.adapter.' + this.name, {
+                common: { type: 'visualization-widgets' }
+            });
+        } catch (e) {
+            this.log.debug('Could not set adapter type: ' + e.message);
+        }
+
         this.dbPath = this.getDbPath();
         this.loadDb();
 

@@ -27,6 +27,8 @@
     "mode": "daemon",
     "platform": "Javascript/Node.js",
     "messagebox": true,
+    "dependencies": [{"vis": "*"}],
+    "restartAdapters": ["vis"],
     "adminUI": {
       "config": "html"
     }
