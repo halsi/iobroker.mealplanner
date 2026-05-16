@@ -116,7 +116,7 @@ class MealplannerAdapter extends utils.Adapter {
         await this.setStateAsync('info.db_dishes', { val: this.db.dishes.length, ack: true });
         await this.setStateAsync('info.db_sides', { val: this.db.sides.length, ack: true });
         await this.setStateAsync('info.database', {
-            val: JSON.stringify({ dishes: this.db.dishes, sides: this.db.sides }),
+            val: JSON.stringify({ dishes: this.db.dishes, sides: this.db.sides, categories: this.db.categories }),
             ack: true
         });
 
