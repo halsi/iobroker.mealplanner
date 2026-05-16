@@ -20,7 +20,7 @@
     "authors": ["Wolfgang Halbartschlager"],
     "keywords": ["meal", "planner", "essensplan", "kochen", "wochenplan"],
     "license": "MIT",
-    "type": "general",
+    "type": "visualization-widgets",
     "main": "main.js",
     "enabled": true,
     "readyToRun": true,
