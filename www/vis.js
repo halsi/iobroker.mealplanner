@@ -27,41 +27,58 @@ const CAT_COLORS = {
 
 let db    = { dishes: [], sides: [] };
 let plan  = { current: null, next: null };
-let socket, instance;
+let socket, instance, ns;
 
-// Picker context
-let pickerCtx = null; // { week, day, field }
+let pickerCtx = null;
 
 // ─── Init ─────────────────────────────────────────────────────────────────────
 window.addEventListener('DOMContentLoaded', () => {
     const p = new URLSearchParams(location.search);
     instance = p.get('instance') || '0';
+    ns = 'mealplanner.' + instance + '.';
 
     if (typeof io !== 'undefined') {
         socket = io.connect();
         socket.on('connect', loadAll);
         socket.on('disconnect', () => console.warn('[mp-vis] disconnected'));
     } else {
-        socket = { emit: (e, a, c, m, cb) => cb && cb({ result: [] }) };
+        socket = { emit: (ev, ...args) => { const cb = args[args.length-1]; if (typeof cb==='function') cb(null,null); } };
         loadAll();
     }
 });
 
-function sendTo(cmd, msg) {
-    return new Promise((resolve) => {
-        socket.emit('sendTo', 'mealplanner.' + instance, cmd, msg, (res) => resolve(res));
+// ─── ioBroker socket helpers ──────────────────────────────────────────────────
+function getIoState(id) {
+    return new Promise(resolve => {
+        socket.emit('getState', id, (err, state) => resolve(state));
     });
 }
 
+function setIoState(id, val) {
+    socket.emit('setState', id, { val, ack: false }, () => {});
+}
+
+// ─── Data loading ─────────────────────────────────────────────────────────────
 async function loadAll() {
-    const [dRes, sRes, pRes] = await Promise.all([
-        sendTo('getDishes', {}),
-        sendTo('getSides',  {}),
-        sendTo('getPlan',   {}),
+    const [dbState, planState] = await Promise.all([
+        getIoState(ns + 'info.database'),
+        getIoState(ns + 'info.plan_json'),
     ]);
-    if (dRes && dRes.result) db.dishes = dRes.result;
-    if (sRes && sRes.result) db.sides  = sRes.result;
-    if (pRes && pRes.result) plan      = pRes.result;
+
+    if (dbState && dbState.val) {
+        try {
+            const parsed = JSON.parse(dbState.val);
+            if (parsed.dishes) db.dishes = parsed.dishes;
+            if (parsed.sides)  db.sides  = parsed.sides;
+        } catch (e) { console.error('[mp-vis] database parse error', e); }
+    }
+
+    if (planState && planState.val) {
+        try {
+            plan = JSON.parse(planState.val);
+        } catch (e) { console.error('[mp-vis] plan_json parse error', e); }
+    }
+
     render();
 }
 
@@ -129,26 +146,26 @@ function esc(s) {
 }
 
 // ─── Random ───────────────────────────────────────────────────────────────────
-async function mpRandom(week, day, field) {
+function mpRandom(week, day, field) {
     const list = field === 'main' ? db.dishes : db.sides;
     if (!list.length) return;
     const pick = list[Math.floor(Math.random() * list.length)];
-    await saveEntry(week, day, field, pick.id);
+    saveEntry(week, day, field, pick.id);
 }
 
-async function saveEntry(week, day, field, id) {
+function saveEntry(week, day, field, id) {
     const weekData = plan[week];
     if (!weekData) return;
-    const entry = (weekData.days && weekData.days[day]) ? { ...weekData.days[day] } : {};
 
-    if (field === 'main') entry.hauptspeise_id = id;
-    else                  entry.beilage_id     = id;
-
-    await sendTo('savePlanEntry', { weekKey: weekData.key, day, entry });
-
-    // Update local cache
     if (!weekData.days) weekData.days = {};
-    weekData.days[day] = entry;
+    if (!weekData.days[day]) weekData.days[day] = {};
+
+    const stateField = field === 'main' ? 'main' : 'side';
+    const planField  = field === 'main' ? 'hauptspeise_id' : 'beilage_id';
+
+    weekData.days[day][planField] = id || '';
+    setIoState(ns + 'week.' + week + '.' + day + '.' + stateField, id || '');
+
     render();
 }
 

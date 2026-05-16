@@ -46,6 +46,10 @@ class MealplannerAdapter extends utils.Adapter {
     saveDb() {
         try {
             fs.writeFileSync(this.dbPath, JSON.stringify(this.db, null, 2), 'utf8');
+            this.setState('info.database', {
+                val: JSON.stringify({ dishes: this.db.dishes, sides: this.db.sides }),
+                ack: true
+            });
         } catch (e) {
             this.log.error('DB save failed: ' + e.message);
         }
@@ -103,6 +107,10 @@ class MealplannerAdapter extends utils.Adapter {
         await this.setStateAsync('info.next_kw', { val: nextKW, ack: true });
         await this.setStateAsync('info.db_dishes', { val: this.db.dishes.length, ack: true });
         await this.setStateAsync('info.db_sides', { val: this.db.sides.length, ack: true });
+        await this.setStateAsync('info.database', {
+            val: JSON.stringify({ dishes: this.db.dishes, sides: this.db.sides }),
+            ack: true
+        });
 
         await this.updateTodayStates();
         await this.updateWeekStates();
@@ -154,7 +162,7 @@ class MealplannerAdapter extends utils.Adapter {
     }
 
     async updateWeekStates() {
-        const { kwKey, nextKWKey } = this.getCurrentKWInfo();
+        const { kw, kwKey, nextKW, nextKWKey } = this.getCurrentKWInfo();
         const currentPlan = this.db.plan[kwKey] || {};
         const nextPlan = this.db.plan[nextKWKey] || {};
 
@@ -162,6 +170,14 @@ class MealplannerAdapter extends utils.Adapter {
             await this.writeDayStates('week.current.' + day, currentPlan[day] || {});
             await this.writeDayStates('week.next.' + day, nextPlan[day] || {});
         }
+
+        await this.setStateAsync('info.plan_json', {
+            val: JSON.stringify({
+                current: { kw, key: kwKey, days: currentPlan },
+                next:    { kw: nextKW, key: nextKWKey, days: nextPlan }
+            }),
+            ack: true
+        });
     }
 
     async writeDayStates(prefix, entry) {

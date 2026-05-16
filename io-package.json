@@ -713,6 +713,18 @@
       "type": "state",
       "common": { "name": "Zeitpunkt des letzten Exports", "type": "string", "role": "text", "read": true, "write": false, "def": "" },
       "native": {}
+    },
+    {
+      "_id": "info.database",
+      "type": "state",
+      "common": { "name": "Datenbank (JSON)", "type": "string", "role": "json", "read": true, "write": true, "def": "{\"dishes\":[],\"sides\":[]}" },
+      "native": {}
+    },
+    {
+      "_id": "info.plan_json",
+      "type": "state",
+      "common": { "name": "Wochenplan (JSON)", "type": "string", "role": "json", "read": true, "write": true, "def": "{}" },
+      "native": {}
     }
   ]
 }
