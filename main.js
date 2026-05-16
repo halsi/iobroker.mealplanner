@@ -368,7 +368,6 @@ class MealplannerAdapter extends utils.Adapter {
                     return;
                 }
                 this.db.dishes = this.db.dishes.filter(d => d.id !== id);
-                // Remove from plan as well
                 for (const wkKey of Object.keys(this.db.plan)) {
                     for (const day of Object.keys(this.db.plan[wkKey])) {
                         if (this.db.plan[wkKey][day].hauptspeise_id === id) {
@@ -381,6 +380,29 @@ class MealplannerAdapter extends utils.Adapter {
                 await this.updateWeekStates();
                 await this.updateTodayStates();
                 this.sendTo(obj.from, obj.command, { result: 'ok' }, obj.callback);
+                break;
+            }
+
+            case 'deleteDishes': {
+                const { ids } = obj.message || {};
+                if (!Array.isArray(ids) || !ids.length) {
+                    this.sendTo(obj.from, obj.command, { error: 'ids fehlt' }, obj.callback);
+                    return;
+                }
+                const idSet = new Set(ids);
+                this.db.dishes = this.db.dishes.filter(d => !idSet.has(d.id));
+                for (const wkKey of Object.keys(this.db.plan)) {
+                    for (const day of Object.keys(this.db.plan[wkKey])) {
+                        if (idSet.has(this.db.plan[wkKey][day].hauptspeise_id)) {
+                            this.db.plan[wkKey][day].hauptspeise_id = '';
+                        }
+                    }
+                }
+                this.saveDb();
+                await this.updateDbCountStates();
+                await this.updateWeekStates();
+                await this.updateTodayStates();
+                this.sendTo(obj.from, obj.command, { result: ids.length }, obj.callback);
                 break;
             }
 
@@ -429,6 +451,29 @@ class MealplannerAdapter extends utils.Adapter {
                 await this.updateWeekStates();
                 await this.updateTodayStates();
                 this.sendTo(obj.from, obj.command, { result: 'ok' }, obj.callback);
+                break;
+            }
+
+            case 'deleteSides': {
+                const { ids } = obj.message || {};
+                if (!Array.isArray(ids) || !ids.length) {
+                    this.sendTo(obj.from, obj.command, { error: 'ids fehlt' }, obj.callback);
+                    return;
+                }
+                const idSet = new Set(ids);
+                this.db.sides = this.db.sides.filter(s => !idSet.has(s.id));
+                for (const wkKey of Object.keys(this.db.plan)) {
+                    for (const day of Object.keys(this.db.plan[wkKey])) {
+                        if (idSet.has(this.db.plan[wkKey][day].beilage_id)) {
+                            this.db.plan[wkKey][day].beilage_id = '';
+                        }
+                    }
+                }
+                this.saveDb();
+                await this.updateDbCountStates();
+                await this.updateWeekStates();
+                await this.updateTodayStates();
+                this.sendTo(obj.from, obj.command, { result: ids.length }, obj.callback);
                 break;
             }
 

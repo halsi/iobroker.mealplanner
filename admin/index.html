@@ -56,11 +56,15 @@
             <button class="mp-btn mp-btn-primary" onclick="mpEditDish(null)">
                 &#xFF0B; Gericht hinzufügen
             </button>
+            <button id="mp-dishes-delete-btn" class="mp-btn mp-btn-danger" style="display:none" onclick="mpDeleteSelectedDishes()">
+                &#x1F5D1; Ausgewählte löschen (<span id="mp-dishes-sel-count">0</span>)
+            </button>
         </div>
 
         <table class="mp-db-table">
             <thead>
                 <tr>
+                    <th style="width:36px"><input type="checkbox" id="mp-dishes-check-all" onchange="mpToggleAllDishes(this.checked)"></th>
                     <th>Name</th>
                     <th style="width:120px">Kategorie</th>
                     <th style="width:80px">Rezept</th>
@@ -69,7 +73,7 @@
                 </tr>
             </thead>
             <tbody id="mp-dishes-tbody">
-                <tr><td colspan="5" class="mp-loading">Lade...</td></tr>
+                <tr><td colspan="6" class="mp-loading">Lade...</td></tr>
             </tbody>
         </table>
 
@@ -82,11 +86,15 @@
             <button class="mp-btn mp-btn-primary" onclick="mpEditSide(null)">
                 &#xFF0B; Beilage hinzufügen
             </button>
+            <button id="mp-sides-delete-btn" class="mp-btn mp-btn-danger" style="display:none" onclick="mpDeleteSelectedSides()">
+                &#x1F5D1; Ausgewählte löschen (<span id="mp-sides-sel-count">0</span>)
+            </button>
         </div>
 
         <table class="mp-db-table">
             <thead>
                 <tr>
+                    <th style="width:36px"><input type="checkbox" id="mp-sides-check-all" onchange="mpToggleAllSides(this.checked)"></th>
                     <th>Name</th>
                     <th style="width:80px">Rezept</th>
                     <th style="width:80px">Portionen</th>
@@ -94,7 +102,7 @@
                 </tr>
             </thead>
             <tbody id="mp-sides-tbody">
-                <tr><td colspan="4" class="mp-loading">Lade...</td></tr>
+                <tr><td colspan="5" class="mp-loading">Lade...</td></tr>
             </tbody>
         </table>
 
