@@ -1,11 +1,20 @@
 /* iobroker.mealplanner admin styles */
 
+/* Force light theme — ioBroker dark mode injects dark backgrounds into the iframe */
+html, body {
+    background: #fff !important;
+    color: #212121 !important;
+    margin: 0;
+    padding: 0;
+}
+
 /* ── Layout ──────────────────────────────────────────────────────────────── */
 
 #mp-root {
     font-family: Roboto, "Helvetica Neue", Arial, sans-serif;
     font-size: 14px;
     color: #212121;
+    background: #fff;
     padding: 0;
     margin: 0;
     height: 100%;
