@@ -219,13 +219,15 @@
     var systemLang = 'de';
 
     document.addEventListener('DOMContentLoaded', function () {
-        // Standard ioBroker admin pattern
+        // Read instance number from URL (?instance=0)
+        var urlParams = new URLSearchParams(window.location.search);
+        instance = urlParams.get('instance') || '0';
+
         if (typeof io !== 'undefined') {
             socket = io.connect();
             socket.on('connect', function () {
-                socket.emit('getVersion', function (version) {
-                    console.log('Connected to ioBroker, version: ' + version);
-                });
+                // Socket is ready — now safe to call sendTo
+                mpInit();
             });
         } else {
             // Fallback for development / standalone preview
@@ -236,14 +238,8 @@
                     if (cb) cb({ result: [] });
                 }
             };
+            mpInit();
         }
-
-        // Read instance number from URL (?instance=0)
-        var urlParams = new URLSearchParams(window.location.search);
-        instance = urlParams.get('instance') || '0';
-
-        // Kick off
-        mpInit();
     });
 
     // translateAll is provided by translate.js (ioBroker)
