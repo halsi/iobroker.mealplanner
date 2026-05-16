@@ -19,6 +19,8 @@ window.addEventListener('DOMContentLoaded', () => {
         socket = { emit: (_ev, ...args) => { const cb = args[args.length - 1]; if (typeof cb === 'function') cb(null, null); } };
         loadAll();
     }
+
+    document.addEventListener('click', hidePicker);
 });
 
 function getState(id) {
@@ -45,7 +47,7 @@ async function loadAll() {
 
 function mondayOfKW(kw, year) {
     const jan4 = new Date(year, 0, 4);
-    const dow  = (jan4.getDay() + 6) % 7; // 0=Mon
+    const dow  = (jan4.getDay() + 6) % 7;
     const monday1 = new Date(jan4);
     monday1.setDate(jan4.getDate() - dow);
     const result = new Date(monday1);
@@ -82,7 +84,6 @@ function render() {
     const kw   = weekData?.kw   || null;
     const days = weekData?.days || {};
 
-    // Header
     if (kw) {
         const year   = yearForKW(kw);
         const monday = mondayOfKW(kw, year);
@@ -94,17 +95,15 @@ function render() {
         document.getElementById('mp-date-range').textContent = '';
     }
 
-    const today  = todayDayName();
-    const monday = kw ? mondayOfKW(yearForKW(kw), kw) : null;
-
-    // Correct arg order
+    const today      = todayDayName();
     const mondayDate = kw ? mondayOfKW(kw, yearForKW(kw)) : null;
 
     const rows = DAYS.map((day, i) => {
         const entry   = days[day] || {};
         const dish    = db.dishes.find(d => d.id === entry.hauptspeise_id) || null;
         const side    = db.sides.find(s => s.id === entry.beilage_id)      || null;
-        const catObj  = db.categories.find(c => c.name === dish?.kategorie) || null;
+        const catName = entry.kategorie || dish?.kategorie || '';
+        const catObj  = db.categories.find(c => c.name === catName) || null;
         const isToday = weekKey === 'current' && day === today;
 
         const dateStr = mondayDate ? fmtShort(new Date(mondayDate.getTime() + i * 86400000)) : '';
@@ -113,12 +112,19 @@ function render() {
             ? `<span class="cat-dot" style="background:${catObj.color}"></span>`
             : '<span class="cat-dot empty"></span>';
 
+        const catTextStyle = catObj ? ` style="color:${catObj.color}"` : '';
+        const catLabel     = catName
+            ? `<span${catTextStyle}>${esc(catName)}</span>`
+            : '<span class="empty">—</span>';
+
         return `<tr class="${isToday ? 'today' : ''}">
             <td class="col-day">
                 <span class="day-name">${esc(day)}</span>
                 <span class="day-date">${dateStr}</span>
             </td>
-            <td class="col-cat">${catDot}${esc(dish?.kategorie || '')}</td>
+            <td class="col-cat" onclick="openCatPicker(event,'${esc(day)}')">
+                ${catDot}${catLabel}
+            </td>
             <td class="col-main">${dish ? esc(dish.name) : '<span class="empty">—</span>'}</td>
             <td class="col-side">${side ? esc(side.name) : '<span class="empty">—</span>'}</td>
         </tr>`;
@@ -128,5 +134,67 @@ function render() {
 }
 
 function esc(s) {
-    return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
+// ─── Category picker ──────────────────────────────────────────────────────────
+
+let _pickerDay = null;
+let _pickerWeekKey = null;
+
+function openCatPicker(e, day) {
+    e.stopPropagation();
+
+    const p = new URLSearchParams(location.search);
+    _pickerWeekKey = p.get('week') === 'next' ? 'next' : 'current';
+    _pickerDay     = day;
+
+    let picker = document.getElementById('mp-cat-picker');
+    if (!picker) {
+        picker = document.createElement('div');
+        picker.id = 'mp-cat-picker';
+        document.body.appendChild(picker);
+        picker.addEventListener('click', e2 => e2.stopPropagation());
+    }
+
+    const cats = db.categories;
+    let html = '';
+
+    if (cats.length === 0) {
+        html = '<div class="mp-cat-option" style="color:rgba(255,153,0,.45);cursor:default">Keine Kategorien</div>';
+    } else {
+        html = cats.map(c =>
+            `<button class="mp-cat-option" style="color:${c.color}" onclick="selectCat('${c.name.replace(/'/g,"\\'")}')">${esc(c.name)}</button>`
+        ).join('');
+    }
+    html += `<button class="mp-cat-option mp-cat-option-clear" onclick="selectCat('')">— löschen —</button>`;
+    picker.innerHTML = html;
+
+    const rect = e.currentTarget.getBoundingClientRect();
+    picker.style.left    = rect.left + 'px';
+    picker.style.top     = (rect.bottom + 4) + 'px';
+    picker.style.display = 'block';
+}
+
+function hidePicker() {
+    const picker = document.getElementById('mp-cat-picker');
+    if (picker) picker.style.display = 'none';
+}
+
+function selectCat(catName) {
+    hidePicker();
+    if (!_pickerDay || !_pickerWeekKey) return;
+
+    if (!plan[_pickerWeekKey])       plan[_pickerWeekKey] = { days: {} };
+    if (!plan[_pickerWeekKey].days)  plan[_pickerWeekKey].days = {};
+    if (!plan[_pickerWeekKey].days[_pickerDay]) plan[_pickerWeekKey].days[_pickerDay] = {};
+
+    if (catName) {
+        plan[_pickerWeekKey].days[_pickerDay].kategorie = catName;
+    } else {
+        delete plan[_pickerWeekKey].days[_pickerDay].kategorie;
+    }
+
+    socket.emit('setState', ns + 'info.plan_json', { val: JSON.stringify(plan), ack: false }, () => {});
+    render();
 }
