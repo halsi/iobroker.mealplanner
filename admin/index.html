@@ -222,12 +222,33 @@
         // Read instance number from URL (?instance=0)
         var urlParams = new URLSearchParams(window.location.search);
         instance = urlParams.get('instance') || '0';
+        console.log('[mp] instance=' + instance);
 
         if (typeof io !== 'undefined') {
             socket = io.connect();
+            console.log('[mp] socket created, waiting for connect...');
             socket.on('connect', function () {
-                // Socket is ready — now safe to call sendTo
-                mpInit();
+                console.log('[mp] socket connected! id=' + socket.id);
+                // Quick ping test before full init
+                console.log('[mp] sending test sendTo → mealplanner.' + instance);
+                socket.emit('sendTo', 'mealplanner.' + instance, 'getDishes', {}, function(res) {
+                    console.log('[mp] TEST sendTo callback fired! res=', res);
+                    mpInit();
+                });
+                // Timeout if callback never fires
+                setTimeout(function() {
+                    if (document.getElementById('mp-root').innerHTML.includes('Lade')) {
+                        console.error('[mp] TIMEOUT: sendTo callback never fired after 5s');
+                        document.getElementById('mp-root').innerHTML =
+                            '<div style="color:red;padding:20px">sendTo callback kam nie an.<br>Sieh Browser-Console + ioBroker Log.</div>';
+                    }
+                }, 5000);
+            });
+            socket.on('disconnect', function(reason) {
+                console.warn('[mp] socket disconnected:', reason);
+            });
+            socket.on('connect_error', function(err) {
+                console.error('[mp] connect_error:', err);
             });
         } else {
             // Fallback for development / standalone preview

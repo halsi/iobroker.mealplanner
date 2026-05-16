@@ -301,12 +301,20 @@ class MealplannerAdapter extends utils.Adapter {
 
     async onMessage(obj) {
         if (!obj || !obj.command) return;
-        this.log.debug(`onMessage: ${obj.command} from ${obj.from}`);
+        this.log.info(`onMessage: ${obj.command} | from=${obj.from} | callback type=${typeof obj.callback} | callback value=${JSON.stringify(obj.callback)}`);
 
         switch (obj.command) {
-            case 'getDishes':
-                this.sendTo(obj.from, obj.command, { result: this.db.dishes }, obj.callback);
+            case 'getDishes': {
+                const resp = { result: this.db.dishes };
+                this.log.info(`getDishes: replying with ${this.db.dishes.length} dishes`);
+                try {
+                    this.sendTo(obj.from, obj.command, resp, obj.callback);
+                    this.log.info('getDishes: sendTo called successfully');
+                } catch(e) {
+                    this.log.error('getDishes: sendTo failed: ' + e.message);
+                }
                 break;
+            }
 
             case 'getSides':
                 this.sendTo(obj.from, obj.command, { result: this.db.sides }, obj.callback);
