@@ -77,9 +77,13 @@ function todayDayName() {
 
 // ─── Render ───────────────────────────────────────────────────────────────────
 
+function currentWeekKey() {
+    const p = new URLSearchParams(location.search);
+    return p.get('week') === 'next' ? 'next' : 'current';
+}
+
 function render() {
-    const p       = new URLSearchParams(location.search);
-    const weekKey = p.get('week') === 'next' ? 'next' : 'current';
+    const weekKey  = currentWeekKey();
     const weekData = plan[weekKey];
     const kw   = weekData?.kw   || null;
     const days = weekData?.days || {};
@@ -113,20 +117,26 @@ function render() {
             : '<span class="cat-dot empty"></span>';
 
         const catTextStyle = catObj ? ` style="color:${catObj.color}"` : '';
-        const catLabel     = catName
+        const catLabel = catName
             ? `<span${catTextStyle}>${esc(catName)}</span>`
             : '<span class="empty">—</span>';
+
+        const dayAttr = `data-day="${esc(day)}"`;
 
         return `<tr class="${isToday ? 'today' : ''}">
             <td class="col-day">
                 <span class="day-name">${esc(day)}</span>
                 <span class="day-date">${dateStr}</span>
             </td>
-            <td class="col-cat" onclick="openCatPicker(event,'${esc(day)}')">
+            <td class="col-cat col-pick" ${dayAttr} onclick="openCatPicker(event,'${esc(day)}')">
                 ${catDot}${catLabel}
             </td>
-            <td class="col-main">${dish ? esc(dish.name) : '<span class="empty">—</span>'}</td>
-            <td class="col-side">${side ? esc(side.name) : '<span class="empty">—</span>'}</td>
+            <td class="col-main col-pick" ${dayAttr} onclick="openDishPicker(event,'${esc(day)}')">
+                ${dish ? esc(dish.name) : '<span class="empty">—</span>'}
+            </td>
+            <td class="col-side col-pick" ${dayAttr} onclick="openSidePicker(event,'${esc(day)}')">
+                ${side ? esc(side.name) : '<span class="empty">—</span>'}
+            </td>
         </tr>`;
     });
 
@@ -137,64 +147,146 @@ function esc(s) {
     return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
 }
 
-// ─── Category picker ──────────────────────────────────────────────────────────
+// ─── Generic picker ───────────────────────────────────────────────────────────
 
-let _pickerDay = null;
-let _pickerWeekKey = null;
+let _picker = { day: null, weekKey: null, type: null };
 
-function openCatPicker(e, day) {
-    e.stopPropagation();
-
-    const p = new URLSearchParams(location.search);
-    _pickerWeekKey = p.get('week') === 'next' ? 'next' : 'current';
-    _pickerDay     = day;
-
-    let picker = document.getElementById('mp-cat-picker');
-    if (!picker) {
-        picker = document.createElement('div');
-        picker.id = 'mp-cat-picker';
-        document.body.appendChild(picker);
-        picker.addEventListener('click', e2 => e2.stopPropagation());
+function getPicker() {
+    let el = document.getElementById('mp-picker');
+    if (!el) {
+        el = document.createElement('div');
+        el.id = 'mp-picker';
+        el.className = 'mp-picker';
+        document.body.appendChild(el);
+        el.addEventListener('click', e => e.stopPropagation());
     }
+    return el;
+}
 
-    const cats = db.categories;
-    let html = '';
-
-    if (cats.length === 0) {
-        html = '<div class="mp-cat-option" style="color:rgba(255,153,0,.45);cursor:default">Keine Kategorien</div>';
-    } else {
-        html = cats.map(c =>
-            `<button class="mp-cat-option" style="color:${c.color}" onclick="selectCat('${c.name.replace(/'/g,"\\'")}')">${esc(c.name)}</button>`
-        ).join('');
-    }
-    html += `<button class="mp-cat-option mp-cat-option-clear" onclick="selectCat('')">— löschen —</button>`;
-    picker.innerHTML = html;
-
+function showPicker(e, day, html) {
+    const el = getPicker();
+    el.innerHTML = html;
     const rect = e.currentTarget.getBoundingClientRect();
-    picker.style.left    = rect.left + 'px';
-    picker.style.top     = (rect.bottom + 4) + 'px';
-    picker.style.display = 'block';
+    el.style.left    = rect.left + 'px';
+    el.style.top     = (rect.bottom + 4) + 'px';
+    el.style.display = 'block';
 }
 
 function hidePicker() {
-    const picker = document.getElementById('mp-cat-picker');
-    if (picker) picker.style.display = 'none';
+    const el = document.getElementById('mp-picker');
+    if (el) el.style.display = 'none';
+}
+
+function dayEntry(weekKey, day) {
+    if (!plan[weekKey])            plan[weekKey] = { days: {} };
+    if (!plan[weekKey].days)       plan[weekKey].days = {};
+    if (!plan[weekKey].days[day])  plan[weekKey].days[day] = {};
+    return plan[weekKey].days[day];
+}
+
+function savePlan() {
+    socket.emit('setState', ns + 'info.plan_json', { val: JSON.stringify(plan), ack: false }, () => {});
+}
+
+// ─── Category picker ──────────────────────────────────────────────────────────
+
+function openCatPicker(e, day) {
+    e.stopPropagation();
+    _picker = { day, weekKey: currentWeekKey(), type: 'cat' };
+
+    const cats = db.categories;
+    let html = cats.length === 0
+        ? '<div class="mp-pick-empty">Keine Kategorien angelegt</div>'
+        : cats.map(c =>
+            `<button class="mp-pick-opt" style="color:${c.color}" onclick="selectCat(${JSON.stringify(c.name)})">${esc(c.name)}</button>`
+          ).join('');
+
+    html += `<button class="mp-pick-opt mp-pick-clear" onclick="selectCat('')">— löschen —</button>`;
+    showPicker(e, day, html);
 }
 
 function selectCat(catName) {
     hidePicker();
-    if (!_pickerDay || !_pickerWeekKey) return;
-
-    if (!plan[_pickerWeekKey])       plan[_pickerWeekKey] = { days: {} };
-    if (!plan[_pickerWeekKey].days)  plan[_pickerWeekKey].days = {};
-    if (!plan[_pickerWeekKey].days[_pickerDay]) plan[_pickerWeekKey].days[_pickerDay] = {};
-
+    const entry = dayEntry(_picker.weekKey, _picker.day);
     if (catName) {
-        plan[_pickerWeekKey].days[_pickerDay].kategorie = catName;
+        entry.kategorie = catName;
+        if (entry.hauptspeise_id) {
+            const dish = db.dishes.find(d => d.id === entry.hauptspeise_id);
+            if (dish && dish.kategorie !== catName) {
+                entry.hauptspeise_id = '';
+            }
+        }
     } else {
-        delete plan[_pickerWeekKey].days[_pickerDay].kategorie;
+        delete entry.kategorie;
     }
+    savePlan();
+    render();
+}
 
-    socket.emit('setState', ns + 'info.plan_json', { val: JSON.stringify(plan), ack: false }, () => {});
+// ─── Dish picker ──────────────────────────────────────────────────────────────
+
+function openDishPicker(e, day) {
+    e.stopPropagation();
+    _picker = { day, weekKey: currentWeekKey(), type: 'dish' };
+
+    const entry   = (plan[_picker.weekKey]?.days || {})[day] || {};
+    const catName = entry.kategorie || '';
+    const dishes  = catName
+        ? db.dishes.filter(d => d.kategorie === catName)
+        : db.dishes;
+
+    let header = catName
+        ? `<div class="mp-pick-header">${esc(catName)}</div>`
+        : '<div class="mp-pick-header" style="color:rgba(255,153,0,.5)">Alle Gerichte</div>';
+
+    let html = header;
+    if (dishes.length === 0) {
+        html += '<div class="mp-pick-empty">Keine Gerichte in dieser Kategorie</div>';
+    } else {
+        const catObj = db.categories.find(c => c.name === catName);
+        const color  = catObj?.color || '#FF9900';
+        html += dishes.map(d =>
+            `<button class="mp-pick-opt" style="color:${color}" onclick="selectDish(${JSON.stringify(d.id)})">${esc(d.name)}</button>`
+        ).join('');
+    }
+    html += `<button class="mp-pick-opt mp-pick-clear" onclick="selectDish('')">— löschen —</button>`;
+    showPicker(e, day, html);
+}
+
+function selectDish(dishId) {
+    hidePicker();
+    const entry = dayEntry(_picker.weekKey, _picker.day);
+    entry.hauptspeise_id = dishId;
+    if (dishId && !entry.kategorie) {
+        const dish = db.dishes.find(d => d.id === dishId);
+        if (dish?.kategorie) entry.kategorie = dish.kategorie;
+    }
+    savePlan();
+    render();
+}
+
+// ─── Side picker ──────────────────────────────────────────────────────────────
+
+function openSidePicker(e, day) {
+    e.stopPropagation();
+    _picker = { day, weekKey: currentWeekKey(), type: 'side' };
+
+    let html = '<div class="mp-pick-header">Beilage</div>';
+    if (db.sides.length === 0) {
+        html += '<div class="mp-pick-empty">Keine Beilagen angelegt</div>';
+    } else {
+        html += db.sides.map(s =>
+            `<button class="mp-pick-opt" onclick="selectSide(${JSON.stringify(s.id)})">${esc(s.name)}</button>`
+        ).join('');
+    }
+    html += `<button class="mp-pick-opt mp-pick-clear" onclick="selectSide('')">— löschen —</button>`;
+    showPicker(e, day, html);
+}
+
+function selectSide(sideId) {
+    hidePicker();
+    const entry = dayEntry(_picker.weekKey, _picker.day);
+    entry.beilage_id = sideId;
+    savePlan();
     render();
 }
