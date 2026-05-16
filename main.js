@@ -52,6 +52,10 @@ class MealplannerAdapter extends utils.Adapter {
 
     saveDb() {
         try {
+            const byName = (a, b) => a.name.localeCompare(b.name, 'de');
+            this.db.dishes     = [...this.db.dishes].sort(byName);
+            this.db.sides      = [...this.db.sides].sort(byName);
+            this.db.categories = [...this.db.categories].sort(byName);
             fs.writeFileSync(this.dbPath, JSON.stringify(this.db, null, 2), 'utf8');
             this.setState('info.database', {
                 val: JSON.stringify({ dishes: this.db.dishes, sides: this.db.sides, categories: this.db.categories }),
