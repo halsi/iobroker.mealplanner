@@ -75,12 +75,11 @@ function todayDayName() {
     return ['Sonntag','Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag'][new Date().getDay()];
 }
 
-// ─── Render ───────────────────────────────────────────────────────────────────
-
 function currentWeekKey() {
-    const p = new URLSearchParams(location.search);
-    return p.get('week') === 'next' ? 'next' : 'current';
+    return new URLSearchParams(location.search).get('week') === 'next' ? 'next' : 'current';
 }
+
+// ─── Render ───────────────────────────────────────────────────────────────────
 
 function render() {
     const weekKey  = currentWeekKey();
@@ -101,8 +100,10 @@ function render() {
 
     const today      = todayDayName();
     const mondayDate = kw ? mondayOfKW(kw, yearForKW(kw)) : null;
+    const tbody      = document.getElementById('mp-tbody');
+    tbody.innerHTML  = '';
 
-    const rows = DAYS.map((day, i) => {
+    DAYS.forEach((day, i) => {
         const entry   = days[day] || {};
         const dish    = db.dishes.find(d => d.id === entry.hauptspeise_id) || null;
         const side    = db.sides.find(s => s.id === entry.beilage_id)      || null;
@@ -110,87 +111,139 @@ function render() {
         const catObj  = db.categories.find(c => c.name === catName) || null;
         const isToday = weekKey === 'current' && day === today;
 
-        const dateStr = mondayDate ? fmtShort(new Date(mondayDate.getTime() + i * 86400000)) : '';
+        const tr = document.createElement('tr');
+        if (isToday) tr.className = 'today';
 
-        const catDot = catObj
-            ? `<span class="cat-dot" style="background:${catObj.color}"></span>`
-            : '<span class="cat-dot empty"></span>';
+        // Day cell
+        const tdDay = document.createElement('td');
+        tdDay.className = 'col-day';
+        const spanName = document.createElement('span');
+        spanName.className = 'day-name';
+        spanName.textContent = day;
+        const spanDate = document.createElement('span');
+        spanDate.className = 'day-date';
+        spanDate.textContent = mondayDate ? fmtShort(new Date(mondayDate.getTime() + i * 86400000)) : '';
+        tdDay.appendChild(spanName);
+        tdDay.appendChild(spanDate);
 
-        const catTextStyle = catObj ? ` style="color:${catObj.color}"` : '';
-        const catLabel = catName
-            ? `<span${catTextStyle}>${esc(catName)}</span>`
-            : '<span class="empty">—</span>';
+        // Category cell
+        const tdCat = document.createElement('td');
+        tdCat.className = 'col-cat col-pick';
+        const dot = document.createElement('span');
+        dot.className = 'cat-dot' + (catObj ? '' : ' empty');
+        if (catObj) dot.style.background = catObj.color;
+        const catSpan = document.createElement('span');
+        if (catName) {
+            catSpan.textContent = catName;
+            if (catObj) catSpan.style.color = catObj.color;
+        } else {
+            catSpan.className = 'empty';
+            catSpan.textContent = '—';
+        }
+        tdCat.appendChild(dot);
+        tdCat.appendChild(catSpan);
+        tdCat.addEventListener('click', e => { e.stopPropagation(); openCatPicker(e, day); });
 
-        const dayAttr = `data-day="${esc(day)}"`;
+        // Dish cell
+        const tdMain = document.createElement('td');
+        tdMain.className = 'col-main col-pick';
+        if (dish) {
+            tdMain.textContent = dish.name;
+        } else {
+            const empty = document.createElement('span');
+            empty.className = 'empty';
+            empty.textContent = '—';
+            tdMain.appendChild(empty);
+        }
+        tdMain.addEventListener('click', e => { e.stopPropagation(); openDishPicker(e, day); });
 
-        return `<tr class="${isToday ? 'today' : ''}">
-            <td class="col-day">
-                <span class="day-name">${esc(day)}</span>
-                <span class="day-date">${dateStr}</span>
-            </td>
-            <td class="col-cat col-pick" ${dayAttr} onclick="openCatPicker(event,'${esc(day)}')">
-                ${catDot}${catLabel}
-            </td>
-            <td class="col-main col-pick" ${dayAttr} onclick="openDishPicker(event,'${esc(day)}')">
-                ${dish ? esc(dish.name) : '<span class="empty">—</span>'}
-            </td>
-            <td class="col-side col-pick" ${dayAttr} onclick="openSidePicker(event,'${esc(day)}')">
-                ${side ? esc(side.name) : '<span class="empty">—</span>'}
-            </td>
-        </tr>`;
+        // Side cell
+        const tdSide = document.createElement('td');
+        tdSide.className = 'col-side col-pick';
+        if (side) {
+            tdSide.textContent = side.name;
+        } else {
+            const empty = document.createElement('span');
+            empty.className = 'empty';
+            empty.textContent = '—';
+            tdSide.appendChild(empty);
+        }
+        tdSide.addEventListener('click', e => { e.stopPropagation(); openSidePicker(e, day); });
+
+        tr.appendChild(tdDay);
+        tr.appendChild(tdCat);
+        tr.appendChild(tdMain);
+        tr.appendChild(tdSide);
+        tbody.appendChild(tr);
     });
-
-    document.getElementById('mp-tbody').innerHTML = rows.join('');
 }
 
-function esc(s) {
-    return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
-}
+// ─── Picker ───────────────────────────────────────────────────────────────────
 
-// ─── Generic picker ───────────────────────────────────────────────────────────
-
-let _picker = { day: null, weekKey: null, type: null };
-
-function getPicker() {
-    let el = document.getElementById('mp-picker');
-    if (!el) {
-        el = document.createElement('div');
-        el.id = 'mp-picker';
-        el.className = 'mp-picker';
-        document.body.appendChild(el);
-        el.addEventListener('click', e => {
-            e.stopPropagation();
-            const btn = e.target.closest('[data-action]');
-            if (!btn) return;
-            const action = btn.dataset.action;
-            const val    = btn.dataset.val;
-            if (action === 'cat')  selectCat(val);
-            if (action === 'dish') selectDish(val);
-            if (action === 'side') selectSide(val);
-        });
-    }
-    return el;
-}
-
-function showPicker(e, day, html) {
-    const el = getPicker();
-    el.innerHTML = html;
-    const rect = e.currentTarget.getBoundingClientRect();
-    el.style.left    = rect.left + 'px';
-    el.style.top     = (rect.bottom + 4) + 'px';
-    el.style.display = 'block';
-}
+let _pickerDay = null;
+let _pickerWeekKey = null;
 
 function hidePicker() {
     const el = document.getElementById('mp-picker');
     if (el) el.style.display = 'none';
 }
 
-function dayEntry(weekKey, day) {
-    if (!plan[weekKey])            plan[weekKey] = { days: {} };
-    if (!plan[weekKey].days)       plan[weekKey].days = {};
-    if (!plan[weekKey].days[day])  plan[weekKey].days[day] = {};
-    return plan[weekKey].days[day];
+function openPicker(e) {
+    _pickerWeekKey = currentWeekKey();
+    let el = document.getElementById('mp-picker');
+    if (!el) {
+        el = document.createElement('div');
+        el.id = 'mp-picker';
+        el.className = 'mp-picker';
+        el.addEventListener('click', ev => ev.stopPropagation());
+        document.body.appendChild(el);
+    }
+    while (el.firstChild) el.removeChild(el.firstChild);
+    const rect = e.currentTarget.getBoundingClientRect();
+    el.style.left    = rect.left + 'px';
+    el.style.top     = (rect.bottom + 4) + 'px';
+    el.style.display = 'block';
+    return el;
+}
+
+function pickerBtn(label, color, onClick) {
+    const btn = document.createElement('button');
+    btn.className = 'mp-pick-opt';
+    btn.textContent = label;
+    if (color) btn.style.color = color;
+    btn.addEventListener('click', () => { hidePicker(); onClick(); });
+    return btn;
+}
+
+function pickerHeader(label, color) {
+    const d = document.createElement('div');
+    d.className = 'mp-pick-header';
+    d.textContent = label;
+    if (color) d.style.color = color;
+    return d;
+}
+
+function pickerEmpty(msg) {
+    const d = document.createElement('div');
+    d.className = 'mp-pick-empty';
+    d.textContent = msg;
+    return d;
+}
+
+function pickerClear(onClick) {
+    const btn = document.createElement('button');
+    btn.className = 'mp-pick-opt mp-pick-clear';
+    btn.textContent = '— löschen —';
+    btn.addEventListener('click', () => { hidePicker(); onClick(); });
+    return btn;
+}
+
+function dayEntry(day) {
+    const wk = _pickerWeekKey;
+    if (!plan[wk])           plan[wk] = { days: {} };
+    if (!plan[wk].days)      plan[wk].days = {};
+    if (!plan[wk].days[day]) plan[wk].days[day] = {};
+    return plan[wk].days[day];
 }
 
 function savePlan() {
@@ -200,102 +253,93 @@ function savePlan() {
 // ─── Category picker ──────────────────────────────────────────────────────────
 
 function openCatPicker(e, day) {
-    e.stopPropagation();
-    _picker = { day, weekKey: currentWeekKey(), type: 'cat' };
+    _pickerDay = day;
+    const el = openPicker(e);
 
-    const cats = db.categories;
-    let html = cats.length === 0
-        ? '<div class="mp-pick-empty">Keine Kategorien angelegt</div>'
-        : cats.map(c =>
-            `<button class="mp-pick-opt" style="color:${c.color}" data-val="${esc(c.name)}" data-action="cat">${esc(c.name)}</button>`
-          ).join('');
-
-    html += `<button class="mp-pick-opt mp-pick-clear" data-val="" data-action="cat">— löschen —</button>`;
-    showPicker(e, day, html);
-}
-
-function selectCat(catName) {
-    hidePicker();
-    const entry = dayEntry(_picker.weekKey, _picker.day);
-    if (catName) {
-        entry.kategorie = catName;
-        if (entry.hauptspeise_id) {
-            const dish = db.dishes.find(d => d.id === entry.hauptspeise_id);
-            if (dish && dish.kategorie !== catName) {
-                entry.hauptspeise_id = '';
-            }
-        }
+    if (db.categories.length === 0) {
+        el.appendChild(pickerEmpty('Keine Kategorien angelegt'));
     } else {
-        delete entry.kategorie;
+        db.categories.forEach(c => {
+            el.appendChild(pickerBtn(c.name, c.color, () => {
+                const entry = dayEntry(day);
+                entry.kategorie = c.name;
+                if (entry.hauptspeise_id) {
+                    const dish = db.dishes.find(d => d.id === entry.hauptspeise_id);
+                    if (dish && dish.kategorie !== c.name) entry.hauptspeise_id = '';
+                }
+                savePlan();
+                render();
+            }));
+        });
     }
-    savePlan();
-    render();
+    el.appendChild(pickerClear(() => {
+        const entry = dayEntry(day);
+        delete entry.kategorie;
+        savePlan();
+        render();
+    }));
 }
 
 // ─── Dish picker ──────────────────────────────────────────────────────────────
 
 function openDishPicker(e, day) {
-    e.stopPropagation();
-    _picker = { day, weekKey: currentWeekKey(), type: 'dish' };
+    _pickerDay = day;
+    const el = openPicker(e);
 
-    const entry   = (plan[_picker.weekKey]?.days || {})[day] || {};
+    const wk      = _pickerWeekKey;
+    const entry   = (plan[wk]?.days || {})[day] || {};
     const catName = entry.kategorie || '';
-    const dishes  = catName
-        ? db.dishes.filter(d => d.kategorie === catName)
-        : db.dishes;
+    const catObj  = db.categories.find(c => c.name === catName);
+    const color   = catObj?.color || null;
+    const dishes  = catName ? db.dishes.filter(d => d.kategorie === catName) : db.dishes;
 
-    let header = catName
-        ? `<div class="mp-pick-header">${esc(catName)}</div>`
-        : '<div class="mp-pick-header" style="color:rgba(255,153,0,.5)">Alle Gerichte</div>';
+    el.appendChild(pickerHeader(catName || 'Alle Gerichte', catName ? color : 'rgba(255,153,0,.5)'));
 
-    let html = header;
     if (dishes.length === 0) {
-        html += '<div class="mp-pick-empty">Keine Gerichte in dieser Kategorie</div>';
+        el.appendChild(pickerEmpty('Keine Gerichte in dieser Kategorie'));
     } else {
-        const catObj = db.categories.find(c => c.name === catName);
-        const color  = catObj?.color || '#FF9900';
-        html += dishes.map(d =>
-            `<button class="mp-pick-opt" style="color:${color}" data-val="${esc(d.id)}" data-action="dish">${esc(d.name)}</button>`
-        ).join('');
+        dishes.forEach(d => {
+            el.appendChild(pickerBtn(d.name, color, () => {
+                const entry2 = dayEntry(day);
+                entry2.hauptspeise_id = d.id;
+                if (!entry2.kategorie && d.kategorie) entry2.kategorie = d.kategorie;
+                savePlan();
+                render();
+            }));
+        });
     }
-    html += `<button class="mp-pick-opt mp-pick-clear" data-val="" data-action="dish">— löschen —</button>`;
-    showPicker(e, day, html);
-}
-
-function selectDish(dishId) {
-    hidePicker();
-    const entry = dayEntry(_picker.weekKey, _picker.day);
-    entry.hauptspeise_id = dishId;
-    if (dishId && !entry.kategorie) {
-        const dish = db.dishes.find(d => d.id === dishId);
-        if (dish?.kategorie) entry.kategorie = dish.kategorie;
-    }
-    savePlan();
-    render();
+    el.appendChild(pickerClear(() => {
+        const entry2 = dayEntry(day);
+        entry2.hauptspeise_id = '';
+        savePlan();
+        render();
+    }));
 }
 
 // ─── Side picker ──────────────────────────────────────────────────────────────
 
 function openSidePicker(e, day) {
-    e.stopPropagation();
-    _picker = { day, weekKey: currentWeekKey(), type: 'side' };
+    _pickerDay = day;
+    const el = openPicker(e);
 
-    let html = '<div class="mp-pick-header">Beilage</div>';
+    el.appendChild(pickerHeader('Beilage', null));
+
     if (db.sides.length === 0) {
-        html += '<div class="mp-pick-empty">Keine Beilagen angelegt</div>';
+        el.appendChild(pickerEmpty('Keine Beilagen angelegt'));
     } else {
-        html += db.sides.map(s =>
-            `<button class="mp-pick-opt" data-val="${esc(s.id)}" data-action="side">${esc(s.name)}</button>`
-        ).join('');
+        db.sides.forEach(s => {
+            el.appendChild(pickerBtn(s.name, null, () => {
+                const entry = dayEntry(day);
+                entry.beilage_id = s.id;
+                savePlan();
+                render();
+            }));
+        });
     }
-    html += `<button class="mp-pick-opt mp-pick-clear" data-val="" data-action="side">— löschen —</button>`;
-    showPicker(e, day, html);
-}
-
-function selectSide(sideId) {
-    hidePicker();
-    const entry = dayEntry(_picker.weekKey, _picker.day);
-    entry.beilage_id = sideId;
-    savePlan();
-    render();
+    el.appendChild(pickerClear(() => {
+        const entry = dayEntry(day);
+        entry.beilage_id = '';
+        savePlan();
+        render();
+    }));
 }
