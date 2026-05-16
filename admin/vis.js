@@ -1,5 +1,7 @@
 'use strict';
 
+const MP_VERSION = '0.3.0';
+
 // ─── Config from URL params ───────────────────────────────────────────────────
 (function applyCssVars() {
     const p = new URLSearchParams(location.search);
@@ -17,7 +19,7 @@
 // ─── State ───────────────────────────────────────────────────────────────────
 const DAYS = ['Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag','Sonntag'];
 
-const CAT_COLORS = {
+let CAT_COLORS = {
     vegetarisch: '#43a047',
     fisch:       '#0288d1',
     fleisch:     '#e53935',
@@ -68,8 +70,9 @@ async function loadAll() {
     if (dbState && dbState.val) {
         try {
             const parsed = JSON.parse(dbState.val);
-            if (parsed.dishes) db.dishes = parsed.dishes;
-            if (parsed.sides)  db.sides  = parsed.sides;
+            if (parsed.dishes)     db.dishes = parsed.dishes;
+            if (parsed.sides)      db.sides  = parsed.sides;
+            if (parsed.categories) CAT_COLORS = Object.fromEntries(parsed.categories.map(c => [c.name, c.color]));
         } catch (e) { console.error('[mp-vis] database parse error', e); }
     }
 
@@ -236,4 +239,5 @@ function mpClosePicker(e) {
     const showNext = new URLSearchParams(location.search).get('week') === 'next';
     document.getElementById('mp-block-current').style.display = showNext ? 'none' : '';
     document.getElementById('mp-block-next').style.display    = showNext ? ''     : 'none';
+    document.getElementById(showNext ? 'mp-btn-next' : 'mp-btn-now').classList.add('active');
 })();
