@@ -113,25 +113,24 @@ function renderWeek(weekLabel, tableId, headerId, label) {
         html += `
         <tr class="${isToday ? 'mp-today' : ''}" data-week="${weekLabel}" data-day="${esc(day)}">
             <td class="mp-col-day">${esc(day)}</td>
-            <td class="mp-col-main cat-${esc(cat)}"
-                onclick="mpOpenPicker('${weekLabel}','${esc(day)}','main')">
-                <div class="mp-cell">
-                    <span class="mp-cell-name${mainDish ? '' : ' empty'}">${
-                        mainDish ? esc(mainDish.name) : '— kein Gericht —'
-                    }</span>
-                    <button class="mp-btn-rand" title="Zufällig"
-                        onclick="event.stopPropagation();mpRandom('${weekLabel}','${esc(day)}','main')">↻</button>
-                </div>
+            <td class="mp-col-cat">${esc(cat)}</td>
+            <td class="mp-col-main" onclick="mpOpenPicker('${weekLabel}','${esc(day)}','main')">
+                <span class="mp-cell-name${mainDish ? '' : ' empty'}">${
+                    mainDish ? esc(mainDish.name) : '— kein Gericht —'
+                }</span>
             </td>
-            <td class="mp-col-side"
-                onclick="mpOpenPicker('${weekLabel}','${esc(day)}','side')">
-                <div class="mp-cell">
-                    <span class="mp-cell-name${sideDish ? '' : ' empty'}">${
-                        sideDish ? esc(sideDish.name) : '— keine Beilage —'
-                    }</span>
-                    <button class="mp-btn-rand" title="Zufällig"
-                        onclick="event.stopPropagation();mpRandom('${weekLabel}','${esc(day)}','side')">↻</button>
-                </div>
+            <td class="mp-col-rand">
+                <button class="mp-btn-rand" title="Zufällig"
+                    onclick="mpRandom('${weekLabel}','${esc(day)}','main')">↻</button>
+            </td>
+            <td class="mp-col-side" onclick="mpOpenPicker('${weekLabel}','${esc(day)}','side')">
+                <span class="mp-cell-name${sideDish ? '' : ' empty'}">${
+                    sideDish ? esc(sideDish.name) : '— keine Beilage —'
+                }</span>
+            </td>
+            <td class="mp-col-rand">
+                <button class="mp-btn-rand" title="Zufällig"
+                    onclick="mpRandom('${weekLabel}','${esc(day)}','side')">↻</button>
             </td>
         </tr>`;
     }
