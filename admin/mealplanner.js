@@ -16,6 +16,7 @@ const MP_CAT_LABELS = {
 let mp = {
     dishes: [],
     sides: [],
+    categories: [],
 };
 
 // ─── Utilities ───────────────────────────────────────────────────────────────
@@ -82,12 +83,15 @@ function mpInitTabs() {
 // ─── Data loading ─────────────────────────────────────────────────────────────
 
 async function mpLoadAll() {
-    const [dishRes, sideRes] = await Promise.all([
+    const [dishRes, sideRes, catRes] = await Promise.all([
         mpSendTo('getDishes', {}),
         mpSendTo('getSides', {}),
+        mpSendTo('getCategories', {}),
     ]);
-    if (dishRes && dishRes.result) mp.dishes = dishRes.result;
-    if (sideRes && sideRes.result) mp.sides = sideRes.result;
+    if (dishRes && dishRes.result) mp.dishes     = dishRes.result;
+    if (sideRes && sideRes.result) mp.sides      = sideRes.result;
+    if (catRes  && catRes.result)  mp.categories = catRes.result;
+    mpPopulateCatSelect();
 }
 
 // ─── Dishes tab ───────────────────────────────────────────────────────────────
@@ -289,6 +293,77 @@ function mpCloseSideModal() {
     document.getElementById('mp-side-modal').classList.remove('open');
 }
 
+// ─── Categories tab ───────────────────────────────────────────────────────────
+
+function mpPopulateCatSelect() {
+    const sel = document.getElementById('mp-dish-cat');
+    const cur = sel.value;
+    sel.innerHTML = '<option value="">— keine Kategorie —</option>' +
+        mp.categories.map(c => `<option value="${mpEsc(c.name)}">${mpEsc(c.name)}</option>`).join('');
+    sel.value = cur;
+}
+
+function mpRenderCategories() {
+    const tbody = document.getElementById('mp-cats-tbody');
+    if (!mp.categories.length) {
+        tbody.innerHTML = `<tr><td colspan="3" class="mp-empty">Keine Kategorien vorhanden</td></tr>`;
+        return;
+    }
+    tbody.innerHTML = mp.categories.map(c => `
+        <tr>
+            <td><span style="display:inline-block;width:22px;height:22px;border-radius:50%;background:${mpEsc(c.color)};vertical-align:middle"></span></td>
+            <td>${mpEsc(c.name)}</td>
+            <td class="col-actions">
+                <button class="mp-btn-icon" title="Bearbeiten" onclick="mpEditCategory('${mpEsc(c.id)}')">&#x270E;</button>
+                <button class="mp-btn-icon danger" title="Löschen" onclick="mpDeleteCategory('${mpEsc(c.id)}','${mpEsc(c.name)}')">&#x1F5D1;</button>
+            </td>
+        </tr>`).join('');
+}
+
+function mpEditCategory(id) {
+    const c = id ? mp.categories.find(x => x.id === id) : null;
+    document.getElementById('mp-cat-modal-title').textContent = c ? 'Kategorie bearbeiten' : 'Neue Kategorie';
+    document.getElementById('mp-cat-id').value    = c ? c.id    : '';
+    document.getElementById('mp-cat-name').value  = c ? c.name  : '';
+    document.getElementById('mp-cat-color').value = c ? c.color : '#607d8b';
+    document.getElementById('mp-cat-modal').classList.add('open');
+    document.getElementById('mp-cat-name').focus();
+}
+
+async function mpSaveCategory() {
+    const name = document.getElementById('mp-cat-name').value.trim();
+    if (!name) { mpToast('Name ist erforderlich', true); return; }
+    const cat = {
+        id:    document.getElementById('mp-cat-id').value || undefined,
+        name,
+        color: document.getElementById('mp-cat-color').value,
+    };
+    if (!cat.id) delete cat.id;
+    const res = await mpSendTo('saveCategory', cat);
+    if (res && res.error) { mpToast('Fehler: ' + res.error, true); return; }
+    mpCloseCatModal();
+    const catRes = await mpSendTo('getCategories', {});
+    if (catRes && catRes.result) mp.categories = catRes.result;
+    mpRenderCategories();
+    mpPopulateCatSelect();
+    mpToast('Kategorie gespeichert');
+}
+
+async function mpDeleteCategory(id, name) {
+    if (!confirm(`"${name}" wirklich löschen?`)) return;
+    const res = await mpSendTo('deleteCategory', { id });
+    if (res && res.error) { mpToast('Fehler: ' + res.error, true); return; }
+    const catRes = await mpSendTo('getCategories', {});
+    if (catRes && catRes.result) mp.categories = catRes.result;
+    mpRenderCategories();
+    mpPopulateCatSelect();
+    mpToast('Kategorie gelöscht');
+}
+
+function mpCloseCatModal() {
+    document.getElementById('mp-cat-modal').classList.remove('open');
+}
+
 // ─── Import / Export ──────────────────────────────────────────────────────────
 
 async function mpDoExport() {
@@ -371,4 +446,5 @@ async function mpInit() {
 
     mpRenderDishes();
     mpRenderSides();
+    mpRenderCategories();
 }
