@@ -7,11 +7,10 @@ const path = require('path');
 const DAYS = ['Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag', 'Sonntag'];
 
 const DEFAULT_CATEGORIES = [
-    { name: 'vegetarisch', color: '#43a047' },
-    { name: 'fisch',       color: '#0288d1' },
-    { name: 'fleisch',     color: '#e53935' },
-    { name: 'extern',      color: '#f9a825' },
-    { name: 'event',       color: '#8e24aa' },
+    { name: 'Vegetarisch', color: '#43a047' },
+    { name: 'Fisch',       color: '#0288d1' },
+    { name: 'Fleisch',     color: '#e53935' },
+    { name: 'Extern',      color: '#f9a825' },
 ];
 
 class MealplannerAdapter extends utils.Adapter {
