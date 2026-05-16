@@ -1,5 +1,7 @@
 'use strict';
 
+const MP_VERSION = '0.2.0';
+
 // ─── Config from URL params ───────────────────────────────────────────────────
 (function applyCssVars() {
     const p = new URLSearchParams(location.search);
