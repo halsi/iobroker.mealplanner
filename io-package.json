@@ -1,7 +1,7 @@
 {
   "common": {
     "name": "mealplanner",
-    "version": "0.2.0",
+    "version": "0.3.0",
     "news": {
       "0.2.0": {
         "en": "Column layout: Kategorie column, fixed file upload namespace",
