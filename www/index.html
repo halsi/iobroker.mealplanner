@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Essensplaner</title>
+    <link rel="stylesheet" href="vis.css">
+</head>
+<body>
+
+<div id="mp-vis">
+
+    <div class="mp-week-block">
+        <div class="mp-week-header" id="mp-kw-current">KW — · Diese Woche</div>
+        <table class="mp-vis-table" id="mp-tbl-current"></table>
+    </div>
+
+    <div class="mp-week-block">
+        <div class="mp-week-header" id="mp-kw-next">KW — · Nächste Woche</div>
+        <table class="mp-vis-table" id="mp-tbl-next"></table>
+    </div>
+
+</div>
+
+<!-- ── Picker Modal ─────────────────────────────────────────────────────────── -->
+<div id="mp-picker-overlay" class="mp-picker-overlay" onclick="mpClosePicker(event)">
+    <div class="mp-picker">
+        <div class="mp-picker-head">
+            <input type="search" id="mp-picker-search" placeholder="Suchen…" oninput="mpFilterPicker(this.value)">
+            <button class="mp-picker-close" onclick="mpClosePicker()">✕</button>
+        </div>
+        <div id="mp-picker-list" class="mp-picker-list"></div>
+    </div>
+</div>
+
+<script src="../lib/js/socket.io.js"></script>
+<script src="vis.js"></script>
+
+</body>
+</html>
