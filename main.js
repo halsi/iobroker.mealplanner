@@ -117,17 +117,12 @@ class MealplannerAdapter extends utils.Adapter {
             this.log.warn('Widget-Upload in vis.0 fehlgeschlagen: ' + e.message);
         }
 
-        // Upload www files into admin.0 so VIS serves them at /adapter/mealplanner/
-        const wwwFiles = [
-            { src: 'vis.html', dest: 'adapter/mealplanner/vis.html' },
-            { src: 'vis.js',   dest: 'adapter/mealplanner/vis.js'   },
-            { src: 'vis.css',  dest: 'adapter/mealplanner/vis.css'  },
-        ];
-        for (const { src, dest } of wwwFiles) {
+        // Upload www files to mealplanner file store (served at /adapter/mealplanner/)
+        for (const src of ['vis.html', 'vis.js', 'vis.css']) {
             try {
                 const data = fs.readFileSync(path.join(__dirname, 'www', src));
-                await this.writeFileAsync('admin.0', dest, data);
-                this.log.debug('www/' + src + ' → admin.0/' + dest);
+                await this.writeFileAsync('mealplanner', src, data);
+                this.log.debug('www/' + src + ' → mealplanner/' + src);
             } catch (e) {
                 this.log.warn('www/' + src + ' Upload fehlgeschlagen: ' + e.message);
             }
