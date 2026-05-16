@@ -237,5 +237,4 @@ function mpClosePicker(e) {
     const showNext = new URLSearchParams(location.search).get('week') === 'next';
     document.getElementById('mp-block-current').style.display = showNext ? 'none' : '';
     document.getElementById('mp-block-next').style.display    = showNext ? ''     : 'none';
-    document.getElementById(showNext ? 'mp-btn-next' : 'mp-btn-now').classList.add('active');
 })();
