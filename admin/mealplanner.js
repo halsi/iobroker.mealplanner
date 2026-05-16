@@ -427,8 +427,6 @@ async function mpInit() {
     mpInitTabs();
     mpInitModalClose();
 
-    document.getElementById('mp-root').innerHTML = '<div class="mp-loading">Lade Daten...</div>';
-
     try {
         await mpLoadAll();
         console.log('[mealplanner] Daten geladen:', mp);
@@ -442,4 +440,5 @@ async function mpInit() {
     mpRenderWeekPlanner();
     mpRenderDishes();
     mpRenderSides();
+    window._mpInitDone = true;
 }

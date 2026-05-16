@@ -235,14 +235,12 @@
                     console.log('[mp] TEST sendTo callback fired! res=', res);
                     mpInit();
                 });
-                // Timeout if callback never fires
+                // Timeout guard — only fires if mpInit never ran
                 setTimeout(function() {
-                    if (document.getElementById('mp-root').innerHTML.includes('Lade')) {
-                        console.error('[mp] TIMEOUT: sendTo callback never fired after 5s');
-                        document.getElementById('mp-root').innerHTML =
-                            '<div style="color:red;padding:20px">sendTo callback kam nie an.<br>Sieh Browser-Console + ioBroker Log.</div>';
+                    if (!window._mpInitDone) {
+                        console.error('[mp] TIMEOUT: mpInit did not complete within 8s');
                     }
-                }, 5000);
+                }, 8000);
             });
             socket.on('disconnect', function(reason) {
                 console.warn('[mp] socket disconnected:', reason);
