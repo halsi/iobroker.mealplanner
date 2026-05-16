@@ -108,6 +108,16 @@ class MealplannerAdapter extends utils.Adapter {
             this.log.debug('Could not set adapter type: ' + e.message);
         }
 
+        // Upload widget HTML to vis.0 file store so VIS can serve it
+        try {
+            const widgetPath = path.join(__dirname, 'widgets', 'mealplanner.html');
+            const widgetData = fs.readFileSync(widgetPath);
+            await this.writeFileAsync('vis.0', 'widgets/mealplanner.html', widgetData);
+            this.log.info('Widget-Datei in vis.0 File Store hochgeladen');
+        } catch (e) {
+            this.log.warn('Widget-Upload in vis.0 fehlgeschlagen: ' + e.message);
+        }
+
         this.dbPath = this.getDbPath();
         this.loadDb();
 

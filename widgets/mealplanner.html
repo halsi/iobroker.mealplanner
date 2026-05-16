@@ -1,4 +1,4 @@
-<!-- Mealplanner Widget Set v1.0.1 -->
+<!-- Mealplanner Widget Set v1.1.0 -->
 
 <script type="text/javascript">
 (function ($) {
@@ -6,168 +6,50 @@
 
     if (typeof vis === 'undefined') return;
 
-    var DAYS = ['Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag','Sonntag'];
-    var CAT_COLORS = { vegetarisch:'#43a047', fisch:'#0288d1', fleisch:'#e53935', extern:'#f9a825', event:'#8e24aa' };
-    var W = {};
-
-    function esc(s) {
-        return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
-    }
-    function todayName() {
-        return ['Sonntag','Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag'][new Date().getDay()];
-    }
-    function render(wid) {
-        if (!W[wid]) return;
-        renderWeek(wid,'current','Diese Woche');
-        renderWeek(wid,'next','Nächste Woche');
-    }
-    function renderWeek(wid, weekLabel, label) {
-        var w = W[wid], plan = w.plan, db = w.db;
-        var weekData = plan ? plan[weekLabel] : null;
-        var kw = weekData ? weekData.kw : '—';
-        var days = weekData ? (weekData.days||{}) : {};
-        $('#'+wid+'-hdr-'+weekLabel).text('KW '+kw+' · '+label);
-        var today = todayName(), html = '';
-        for (var i = 0; i < DAYS.length; i++) {
-            var day = DAYS[i], entry = days[day]||{}, isToday = weekLabel==='current' && day===today;
-            var mainDish = null, sideDish = null;
-            for (var j = 0; j < db.dishes.length; j++) { if (db.dishes[j].id===entry.hauptspeise_id) { mainDish=db.dishes[j]; break; } }
-            for (var k = 0; k < db.sides.length; k++) { if (db.sides[k].id===entry.beilage_id) { sideDish=db.sides[k]; break; } }
-            var cat = mainDish ? (mainDish.kategorie||'') : '';
-            html += '<tr class="'+(isToday?'mp-today':'')+'">';
-            html += '<td class="mp-col-day">'+esc(day)+'</td>';
-            html += '<td class="mp-col-main cat-'+esc(cat)+'" data-week="'+weekLabel+'" data-day="'+esc(day)+'" data-field="main"><div class="mp-cell"><span class="mp-cell-name'+(mainDish?'':' empty')+'">'+(mainDish?esc(mainDish.name):'— kein Gericht —')+'</span><button class="mp-btn-rand" data-week="'+weekLabel+'" data-day="'+esc(day)+'" data-field="main">↻</button></div></td>';
-            html += '<td class="mp-col-side" data-week="'+weekLabel+'" data-day="'+esc(day)+'" data-field="side"><div class="mp-cell"><span class="mp-cell-name'+(sideDish?'':' empty')+'">'+(sideDish?esc(sideDish.name):'— keine Beilage —')+'</span><button class="mp-btn-rand" data-week="'+weekLabel+'" data-day="'+esc(day)+'" data-field="side">↻</button></div></td>';
-            html += '</tr>';
-        }
-        $('#'+wid+'-tbl-'+weekLabel).html(html);
-    }
-    function openPicker(wid, week, day, field) {
-        var w = W[wid]; if (!w) return;
-        w.pickerCtx = {week:week,day:day,field:field};
-        var isSide = field==='side', items = isSide ? w.db.sides : w.db.dishes;
-        var html = '<div class="mp-picker-entry is-random" data-action="random">↻ &nbsp;Zufällig</div>'
-                 + '<div class="mp-picker-entry is-clear" data-action="clear">— '+(isSide?'keine Beilage':'kein Gericht')+' —</div>';
-        for (var i = 0; i < items.length; i++) {
-            var item = items[i], col = CAT_COLORS[item.kategorie]||'';
-            html += '<div class="mp-picker-entry" data-id="'+esc(item.id)+'" data-name="'+esc(item.name)+'"><span class="mp-picker-dot" style="background:'+(col||'transparent')+'"></span>'+esc(item.name)+'</div>';
-        }
-        w.$pickerItems.html(html);
-        w.$pickerSearch.val('');
-        w.$pickerOverlay.addClass('open');
-        w.$pickerSearch.focus();
-    }
-    function closePicker(wid) { var w=W[wid]; if(!w) return; w.$pickerOverlay.removeClass('open'); w.pickerCtx=null; }
-    function pickItem(wid, id) { var w=W[wid]; if(!w||!w.pickerCtx) return; saveEntry(wid,w.pickerCtx.week,w.pickerCtx.day,w.pickerCtx.field,id||''); closePicker(wid); }
-    function pickRandom(wid) {
-        var w=W[wid]; if(!w||!w.pickerCtx) return;
-        var list = w.pickerCtx.field==='main' ? w.db.dishes : w.db.sides;
-        if (!list.length) { closePicker(wid); return; }
-        pickItem(wid, list[Math.floor(Math.random()*list.length)].id);
-    }
-    function saveEntry(wid, week, day, field, id) {
-        var w=W[wid]; if(!w||!w.plan||!w.plan[week]) return;
-        var weekData=w.plan[week];
-        if (!weekData.days) weekData.days={};
-        if (!weekData.days[day]) weekData.days[day]={};
-        weekData.days[day][field==='main'?'hauptspeise_id':'beilage_id'] = id||'';
-        try { vis.conn.setState(w.ns+'week.'+week+'.'+day+'.'+(field==='main'?'main':'side'), {val:id||'',ack:false}, function(){}); } catch(e) {}
-        render(wid);
-    }
-
     vis.binds['mealplanner'] = {
-        version: '1.0.1',
+        version: '1.1.0',
         showVersion: function() {
             if (vis.binds['mealplanner'].version) {
-                console.log('Version mealplanner: '+vis.binds['mealplanner'].version);
+                console.log('Version mealplanner: ' + vis.binds['mealplanner'].version);
                 delete vis.binds['mealplanner'].version;
             }
         },
         createWidget: function(widgetID, view, data, style) {
-            var $div = $('#'+widgetID);
+            console.log('[mp] createWidget: ' + widgetID);
+            var $div = $('#' + widgetID);
             if (!$div.length) {
-                setTimeout(function() { vis.binds['mealplanner'].createWidget(widgetID,view,data,style); }, 200);
+                setTimeout(function() {
+                    vis.binds['mealplanner'].createWidget(widgetID, view, data, style);
+                }, 200);
                 return;
             }
-            var instance = (data && data.attr) ? String(data.attr('instance')||'0') : '0';
-            var ns = 'mealplanner.'+instance+'.';
-            var $overlay = $('<div class="mp-picker-overlay-fixed" id="mp-ov-'+widgetID+'"><div class="mp-picker-box"><div class="mp-picker-head"><input class="mp-picker-search-input" type="search" placeholder="Suchen…"><button class="mp-picker-close-btn">✕</button></div><div class="mp-picker-items"></div></div></div>');
-            $('body').append($overlay);
-            W[widgetID] = { ns:ns, db:{dishes:[],sides:[]}, plan:{current:null,next:null}, pickerCtx:null, $pickerOverlay:$overlay, $pickerSearch:$overlay.find('.mp-picker-search-input'), $pickerItems:$overlay.find('.mp-picker-items') };
-            $div.html('<div class="mp-widget-wrap"><div class="mp-week-block"><div class="mp-week-header" id="'+widgetID+'-hdr-current">KW — · Diese Woche</div><table class="mp-vis-table" id="'+widgetID+'-tbl-current"></table></div><div class="mp-week-block"><div class="mp-week-header" id="'+widgetID+'-hdr-next">KW — · Nächste Woche</div><table class="mp-vis-table" id="'+widgetID+'-tbl-next"></table></div></div>');
-            $div.on('click','.mp-col-main,.mp-col-side',function(e){ if($(e.target).closest('.mp-btn-rand').length) return; var $td=$(this); openPicker(widgetID,$td.data('week'),$td.data('day'),$td.data('field')); });
-            $div.on('click','.mp-btn-rand',function(e){ e.stopPropagation(); var $b=$(this); W[widgetID].pickerCtx={week:$b.data('week'),day:$b.data('day'),field:$b.data('field')}; pickRandom(widgetID); });
-            $overlay.on('input','.mp-picker-search-input',function(){ var q=this.value.toLowerCase(); $overlay.find('.mp-picker-entry[data-id]').each(function(){ $(this).toggleClass('mp-hidden',$(this).data('name').toLowerCase().indexOf(q)===-1); }); });
-            $overlay.on('click','.mp-picker-entry',function(){ var a=$(this).data('action'); if(a==='random') pickRandom(widgetID); else if(a==='clear') pickItem(widgetID,null); else pickItem(widgetID,String($(this).data('id'))); });
-            $overlay.on('click','.mp-picker-close-btn',function(){ closePicker(widgetID); });
-            $overlay.on('click',function(e){ if($(e.target).hasClass('mp-picker-overlay-fixed')) closePicker(widgetID); });
-            vis.conn.getStates([ns+'info.database',ns+'info.plan_json'],function(err,states){
-                if (!W[widgetID]) return;
-                if (states) {
-                    try { if(states[ns+'info.database']&&states[ns+'info.database'].val) W[widgetID].db=JSON.parse(states[ns+'info.database'].val); } catch(e){}
-                    try { if(states[ns+'info.plan_json']&&states[ns+'info.plan_json'].val) W[widgetID].plan=JSON.parse(states[ns+'info.plan_json'].val); } catch(e){}
-                }
-                render(widgetID);
+            $div.css({ padding: '16px', fontFamily: 'sans-serif', fontSize: '18px' });
+            $div.text('Lade...');
+            vis.conn.getStates(['mealplanner.0.today.category'], function(err, states) {
+                console.log('[mp] getStates err=' + err + ' states=' + JSON.stringify(states));
+                var val = (states && states['mealplanner.0.today.category'])
+                    ? String(states['mealplanner.0.today.category'].val || '—')
+                    : '(kein Wert)';
+                $div.text('Kategorie: ' + val);
             });
-            try {
-                vis.states.bind(ns+'info.plan_json',function(e,v){ if(!W[widgetID]) return; try{W[widgetID].plan=JSON.parse(v);}catch(ex){} render(widgetID); });
-                vis.states.bind(ns+'info.database',function(e,v){ if(!W[widgetID]) return; try{W[widgetID].db=JSON.parse(v);}catch(ex){} render(widgetID); });
-            } catch(e) {}
         },
         destroy: function(widgetID) {
-            var w=W[widgetID]; if(!w) return;
-            try { vis.states.unbind(w.ns+'info.plan_json'); vis.states.unbind(w.ns+'info.database'); } catch(e){}
-            if (w.$pickerOverlay) w.$pickerOverlay.remove();
-            $('#'+widgetID).off();
-            delete W[widgetID];
+            $('#' + widgetID).off();
         }
     };
+
     vis.binds['mealplanner'].showVersion();
 
 }(jQuery));
 </script>
 
 <style>
-.mp-widget-wrap { font-family: Roboto,"Helvetica Neue",Arial,sans-serif; font-size:15px; color:#212121; display:flex; flex-direction:column; gap:20px; padding:12px; box-sizing:border-box; user-select:none; width:100%; height:100%; overflow-y:auto; }
-.mp-week-block { border-radius:8px; overflow:hidden; box-shadow:0 2px 8px rgba(0,0,0,.12); }
-.mp-week-header { background:var(--mp-header-bg,#1565c0); color:var(--mp-header-fg,#fff); padding:10px 16px; font-size:15px; font-weight:600; }
-.mp-vis-table { width:100%; border-collapse:collapse; background:#fff; table-layout:fixed; }
-.mp-vis-table tr { border-bottom:1px solid #e0e0e0; }
-.mp-vis-table tr:last-child { border-bottom:none; }
-.mp-vis-table tr:nth-child(even) td { background:#f9f9f9; }
-.mp-vis-table tr.mp-today td { background:var(--mp-today-bg,#fff9c4)!important; font-weight:600; }
-.mp-vis-table td { padding:0; vertical-align:middle; }
-.mp-col-day { width:110px; padding:0 12px; font-size:14px; color:#424242; white-space:nowrap; }
-.mp-today .mp-col-day::before { content:"★ "; color:#f9a825; }
-.mp-col-main,.mp-col-side { cursor:pointer; }
-.mp-col-main.cat-vegetarisch { background:#e8f5e9; }
-.mp-col-main.cat-fisch { background:#e3f2fd; }
-.mp-col-main.cat-fleisch { background:#fce4ec; }
-.mp-col-main.cat-extern { background:#fff8e1; }
-.mp-col-main.cat-event { background:#f3e5f5; }
-.mp-today .mp-col-main, .mp-today .mp-col-side { background:var(--mp-today-bg,#fff9c4)!important; }
-.mp-cell { display:flex; align-items:center; min-height:52px; padding:6px 8px 6px 12px; gap:6px; }
-.mp-cell-name { flex:1; font-size:14px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-.mp-cell-name.empty { color:#bdbdbd; font-style:italic; }
-.mp-btn-rand { flex-shrink:0; width:36px; height:36px; border:none; border-radius:50%; background:#eee; color:#555; font-size:18px; cursor:pointer; display:flex; align-items:center; justify-content:center; }
-.mp-picker-overlay-fixed { display:none; position:fixed; inset:0; background:rgba(0,0,0,.55); z-index:9999; align-items:flex-end; justify-content:center; }
-.mp-picker-overlay-fixed.open { display:flex; }
-.mp-picker-box { background:#fff; width:100%; max-width:600px; max-height:70vh; border-radius:16px 16px 0 0; display:flex; flex-direction:column; overflow:hidden; box-shadow:0 -4px 24px rgba(0,0,0,.2); }
-.mp-picker-head { display:flex; align-items:center; gap:8px; padding:12px 16px; border-bottom:1px solid #e0e0e0; flex-shrink:0; }
-.mp-picker-search-input { flex:1; padding:8px 12px; border:1px solid #e0e0e0; border-radius:8px; font-size:15px; outline:none; }
-.mp-picker-close-btn { width:36px; height:36px; border:none; border-radius:50%; background:#f0f0f0; font-size:16px; cursor:pointer; flex-shrink:0; }
-.mp-picker-items { overflow-y:auto; flex:1; padding:8px 0; }
-.mp-picker-entry { display:flex; align-items:center; padding:14px 20px; cursor:pointer; font-size:15px; border-bottom:1px solid #f5f5f5; gap:12px; }
-.mp-picker-entry:hover,.mp-picker-entry:active { background:#e3f2fd; }
-.mp-picker-entry.is-random { font-weight:600; color:#1565c0; border-bottom:2px solid #e0e0e0; }
-.mp-picker-entry.is-clear { color:#9e9e9e; font-style:italic; border-bottom:2px solid #e0e0e0; }
-.mp-picker-dot { display:inline-block; width:10px; height:10px; border-radius:50%; flex-shrink:0; }
-.mp-picker-entry.mp-hidden { display:none; }
+/* mealplanner minimal */
 </style>
 
 <script id="tplMealplanner2Week" type="text/ejs" class="vis-tpl"
     data-vis-set="mealplanner"
     data-vis-name="Speiseplan 2 Wochen"
-    data-vis-attrs="instance[0]/number;">
-<div class="vis-widget <%== this.data.attr('class') %>" id="<%= this.data.attr('wid') %>" style="width: 640px; height: 520px; overflow: hidden;"></div>
+    data-vis-attrs="">
+<div class="vis-widget <%== this.data.attr('class') %>" id="<%= this.data.attr('wid') %>" style="width: 300px; height: 80px; overflow: hidden;"></div>
 </script>
