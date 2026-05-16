@@ -431,6 +431,26 @@ function mpInitModalClose() {
     });
 }
 
+// ─── Sort & Save ─────────────────────────────────────────────────────────────
+
+async function mpSortAndSave() {
+    const res = await mpSendTo('sortAndSave', {});
+    if (res && res.error) { mpToast('Fehler: ' + res.error, true); return; }
+    const [dishRes, sideRes, catRes] = await Promise.all([
+        mpSendTo('getDishes', {}),
+        mpSendTo('getSides', {}),
+        mpSendTo('getCategories', {}),
+    ]);
+    if (dishRes && dishRes.result) mp.dishes     = dishRes.result;
+    if (sideRes && sideRes.result) mp.sides      = sideRes.result;
+    if (catRes  && catRes.result)  mp.categories = catRes.result;
+    mpRenderDishes();
+    mpRenderSides();
+    mpRenderCategories();
+    mpPopulateCatSelect();
+    mpToast('Gespeichert & alphabetisch sortiert');
+}
+
 // ─── Init ─────────────────────────────────────────────────────────────────────
 
 async function mpInit() {
