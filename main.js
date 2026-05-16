@@ -5,13 +5,20 @@ const fs = require('fs');
 const path = require('path');
 
 const DAYS = ['Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag', 'Sonntag'];
-const CATEGORIES = ['vegetarisch', 'fisch', 'fleisch', 'extern', 'event'];
+
+const DEFAULT_CATEGORIES = [
+    { name: 'vegetarisch', color: '#43a047' },
+    { name: 'fisch',       color: '#0288d1' },
+    { name: 'fleisch',     color: '#e53935' },
+    { name: 'extern',      color: '#f9a825' },
+    { name: 'event',       color: '#8e24aa' },
+];
 
 class MealplannerAdapter extends utils.Adapter {
     constructor(options) {
         super({ ...options, name: 'mealplanner' });
         this.dbPath = null;
-        this.db = { dishes: [], sides: [], plan: {} };
+        this.db = { dishes: [], sides: [], plan: {}, categories: [] };
         this.midnightTimer = null;
         this.on('ready', this.onReady.bind(this));
         this.on('stateChange', this.onStateChange.bind(this));
@@ -33,13 +40,14 @@ class MealplannerAdapter extends utils.Adapter {
         try {
             if (fs.existsSync(this.dbPath)) {
                 this.db = JSON.parse(fs.readFileSync(this.dbPath, 'utf8'));
-                if (!this.db.dishes) this.db.dishes = [];
-                if (!this.db.sides) this.db.sides = [];
-                if (!this.db.plan) this.db.plan = {};
+                if (!this.db.dishes)     this.db.dishes     = [];
+                if (!this.db.sides)      this.db.sides      = [];
+                if (!this.db.plan)       this.db.plan       = {};
+                if (!this.db.categories) this.db.categories = DEFAULT_CATEGORIES.map(c => ({ id: this.generateId(), ...c }));
             }
         } catch (e) {
             this.log.warn('DB load failed, starting fresh: ' + e.message);
-            this.db = { dishes: [], sides: [], plan: {} };
+            this.db = { dishes: [], sides: [], plan: {}, categories: DEFAULT_CATEGORIES.map(c => ({ id: this.generateId(), ...c })) };
         }
     }
 
@@ -47,7 +55,7 @@ class MealplannerAdapter extends utils.Adapter {
         try {
             fs.writeFileSync(this.dbPath, JSON.stringify(this.db, null, 2), 'utf8');
             this.setState('info.database', {
-                val: JSON.stringify({ dishes: this.db.dishes, sides: this.db.sides }),
+                val: JSON.stringify({ dishes: this.db.dishes, sides: this.db.sides, categories: this.db.categories }),
                 ack: true
             });
         } catch (e) {
@@ -364,6 +372,48 @@ class MealplannerAdapter extends utils.Adapter {
             case 'getSides':
                 this.sendTo(obj.from, obj.command, { result: this.db.sides }, obj.callback);
                 break;
+
+            case 'getCategories':
+                this.sendTo(obj.from, obj.command, { result: this.db.categories }, obj.callback);
+                break;
+
+            case 'saveCategory': {
+                const cat = obj.message;
+                if (!cat || !cat.name) {
+                    this.sendTo(obj.from, obj.command, { error: 'Name fehlt' }, obj.callback);
+                    return;
+                }
+                if (cat.id) {
+                    const idx = this.db.categories.findIndex(c => c.id === cat.id);
+                    if (idx < 0) {
+                        this.sendTo(obj.from, obj.command, { error: 'Kategorie nicht gefunden' }, obj.callback);
+                        return;
+                    }
+                    const oldName = this.db.categories[idx].name;
+                    this.db.categories[idx] = { ...this.db.categories[idx], ...cat };
+                    if (oldName !== cat.name) {
+                        this.db.dishes.forEach(d => { if (d.kategorie === oldName) d.kategorie = cat.name; });
+                    }
+                } else {
+                    cat.id = this.generateId();
+                    this.db.categories.push(cat);
+                }
+                this.saveDb();
+                this.sendTo(obj.from, obj.command, { result: cat }, obj.callback);
+                break;
+            }
+
+            case 'deleteCategory': {
+                const { id } = obj.message || {};
+                if (!id) {
+                    this.sendTo(obj.from, obj.command, { error: 'ID fehlt' }, obj.callback);
+                    return;
+                }
+                this.db.categories = this.db.categories.filter(c => c.id !== id);
+                this.saveDb();
+                this.sendTo(obj.from, obj.command, { result: 'ok' }, obj.callback);
+                break;
+            }
 
             case 'getCategories':
                 this.sendTo(obj.from, obj.command, { result: CATEGORIES }, obj.callback);
