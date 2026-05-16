@@ -120,6 +120,23 @@ td.col-cat:hover { background: rgba(255,153,0,.08); }
 
 .empty { color: rgba(255,153,0,.3); }
 
+/* ── Save button ── */
+
+.mp-save-btn {
+    margin-left: auto;
+    padding: 6px 20px;
+    background: #FF9900;
+    color: #1c1c1c;
+    border: none;
+    border-radius: 5px;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+}
+
+.mp-save-btn:hover { background: #FFCC99; }
+
 /* ── Loading ── */
 
 .mp-loading {
