@@ -1,8 +1,12 @@
 {
   "common": {
     "name": "mealplanner",
-    "version": "0.1.0",
+    "version": "0.2.0",
     "news": {
+      "0.2.0": {
+        "en": "Column layout: Kategorie column, fixed file upload namespace",
+        "de": "Neue Spalte Kategorie, korrekter Upload-Namespace"
+      },
       "0.1.0": {
         "en": "Initial release",
         "de": "Erste Version"
