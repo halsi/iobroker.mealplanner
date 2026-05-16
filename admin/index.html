@@ -86,37 +86,6 @@
         <div class="mp-ie-section">
 
             <div class="mp-section">
-                <h3 class="mp-section-title">Wochenplan CSV Export</h3>
-                <p style="color:#616161;margin:0 0 12px 0;font-size:13px">
-                    Exportiert den Wochenplan der aktuellen und nächsten Woche als CSV-Datei.<br>
-                    Format: <code>kw;wochentag;hauptspeise;beilage;typ;notiz</code>
-                </p>
-                <button class="mp-btn mp-btn-primary" onclick="mpDoExport()">
-                    &#x21E9; CSV exportieren
-                </button>
-            </div>
-
-            <div class="mp-section">
-                <h3 class="mp-section-title">Wochenplan CSV Import</h3>
-                <p style="color:#616161;margin:0 0 8px 0;font-size:13px">
-                    CSV-Daten einfügen und importieren. Gerichte und Beilagen müssen in der Datenbank vorhanden sein.
-                </p>
-                <div class="mp-form-row">
-                    <label for="mp-csv-area">CSV-Daten</label>
-                    <textarea id="mp-csv-area" class="mp-csv-area"
-                        placeholder="kw;wochentag;hauptspeise;beilage;typ;notiz&#10;20;Montag;Pasta Bolognese;Salat;normal;&#10;20;Dienstag;..."></textarea>
-                </div>
-                <div class="mp-toolbar">
-                    <button class="mp-btn mp-btn-primary" onclick="mpDoImport()">
-                        &#x21E7; Importieren
-                    </button>
-                    <button class="mp-btn mp-btn-secondary" onclick="document.getElementById('mp-csv-area').value=''">
-                        Leeren
-                    </button>
-                </div>
-            </div>
-
-            <div class="mp-section">
                 <h3 class="mp-section-title">Gerichte CSV Import</h3>
                 <p style="color:#616161;margin:0 0 8px 0;font-size:13px">
                     Format: <code>name;kategorie;portionen;rezept_url</code><br>
