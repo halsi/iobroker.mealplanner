@@ -16,14 +16,14 @@
 
     <!-- Tab bar -->
     <nav class="mp-tabs">
-        <div class="mp-tab active" data-panel="mp-panel-dishes">Gerichte</div>
+        <div class="mp-tab active" data-panel="mp-panel-cats">Kategorien</div>
+        <div class="mp-tab" data-panel="mp-panel-dishes">Gerichte</div>
         <div class="mp-tab" data-panel="mp-panel-sides">Beilagen</div>
-        <div class="mp-tab" data-panel="mp-panel-cats">Kategorien</div>
         <div class="mp-tab" data-panel="mp-panel-ie">Import/Export</div>
     </nav>
 
     <!-- ── Tab: Gerichte ──────────────────────────────────────────────────── -->
-    <div id="mp-panel-dishes" class="mp-panel active">
+    <div id="mp-panel-dishes" class="mp-panel">
 
         <div class="mp-toolbar">
             <button class="mp-btn mp-btn-primary" onclick="mpEditDish(null)">
@@ -82,7 +82,7 @@
     </div>
 
     <!-- ── Tab: Kategorien ───────────────────────────────────────────────── -->
-    <div id="mp-panel-cats" class="mp-panel">
+    <div id="mp-panel-cats" class="mp-panel active">
 
         <div class="mp-toolbar">
             <button class="mp-btn mp-btn-primary" onclick="mpEditCategory(null)">
