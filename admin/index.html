@@ -18,6 +18,7 @@
     <nav class="mp-tabs">
         <div class="mp-tab active" data-panel="mp-panel-dishes">Gerichte</div>
         <div class="mp-tab" data-panel="mp-panel-sides">Beilagen</div>
+        <div class="mp-tab" data-panel="mp-panel-cats">Kategorien</div>
         <div class="mp-tab" data-panel="mp-panel-ie">Import/Export</div>
     </nav>
 
@@ -75,6 +76,30 @@
             </thead>
             <tbody id="mp-sides-tbody">
                 <tr><td colspan="5" class="mp-loading">Lade...</td></tr>
+            </tbody>
+        </table>
+
+    </div>
+
+    <!-- ── Tab: Kategorien ───────────────────────────────────────────────── -->
+    <div id="mp-panel-cats" class="mp-panel">
+
+        <div class="mp-toolbar">
+            <button class="mp-btn mp-btn-primary" onclick="mpEditCategory(null)">
+                &#xFF0B; Kategorie hinzufügen
+            </button>
+        </div>
+
+        <table class="mp-db-table">
+            <thead>
+                <tr>
+                    <th style="width:36px">Farbe</th>
+                    <th>Name</th>
+                    <th style="width:80px"></th>
+                </tr>
+            </thead>
+            <tbody id="mp-cats-tbody">
+                <tr><td colspan="3" class="mp-loading">Lade...</td></tr>
             </tbody>
         </table>
 
@@ -148,11 +173,6 @@
             <label for="mp-dish-cat">Kategorie</label>
             <select id="mp-dish-cat">
                 <option value="">— keine Kategorie —</option>
-                <option value="vegetarisch">Vegetarisch</option>
-                <option value="fisch">Fisch</option>
-                <option value="fleisch">Fleisch</option>
-                <option value="extern">Auswärts</option>
-                <option value="event">Event</option>
             </select>
         </div>
 
@@ -198,6 +218,30 @@
         <div class="mp-modal-footer">
             <button class="mp-btn mp-btn-secondary" onclick="mpCloseSideModal()">Abbrechen</button>
             <button class="mp-btn mp-btn-primary" onclick="mpSaveSide()">Speichern</button>
+        </div>
+    </div>
+</div>
+
+<!-- ── Modal: Kategorie bearbeiten ────────────────────────────────────────── -->
+<div id="mp-cat-modal" class="mp-modal-overlay">
+    <div class="mp-modal">
+        <h3 id="mp-cat-modal-title">Kategorie bearbeiten</h3>
+        <input type="hidden" id="mp-cat-id">
+
+        <div class="mp-form-row">
+            <label for="mp-cat-name">Name *</label>
+            <input type="text" id="mp-cat-name" placeholder="z.B. vegetarisch"
+                onkeydown="if(event.key==='Enter') mpSaveCategory()">
+        </div>
+
+        <div class="mp-form-row">
+            <label for="mp-cat-color">Farbe</label>
+            <input type="color" id="mp-cat-color" value="#607d8b" style="width:60px;height:36px;padding:2px;border:1px solid #ccc;border-radius:4px;cursor:pointer">
+        </div>
+
+        <div class="mp-modal-footer">
+            <button class="mp-btn mp-btn-secondary" onclick="mpCloseCatModal()">Abbrechen</button>
+            <button class="mp-btn mp-btn-primary" onclick="mpSaveCategory()">Speichern</button>
         </div>
     </div>
 </div>
