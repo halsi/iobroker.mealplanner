@@ -129,9 +129,14 @@ td.col-cat:hover { background: rgba(255,153,0,.08); }
     font-size: 15px;
 }
 
-/* ── Category picker popup ── */
+/* ── Clickable columns ── */
 
-#mp-cat-picker {
+.col-pick { cursor: pointer; }
+.col-pick:hover { background: rgba(255,153,0,.08); }
+
+/* ── Picker popup ── */
+
+.mp-picker {
     display: none;
     position: fixed;
     background: #1c1c1c;
@@ -140,10 +145,29 @@ td.col-cat:hover { background: rgba(255,153,0,.08); }
     padding: 4px;
     z-index: 9999;
     box-shadow: 0 6px 24px rgba(0,0,0,.6);
-    min-width: 170px;
+    min-width: 200px;
+    max-height: 420px;
+    overflow-y: auto;
 }
 
-.mp-cat-option {
+.mp-pick-header {
+    padding: 6px 16px 8px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .07em;
+    text-transform: uppercase;
+    color: #FFCC99;
+    border-bottom: 1px solid rgba(255,153,0,.2);
+    margin-bottom: 4px;
+}
+
+.mp-pick-empty {
+    padding: 10px 16px;
+    font-size: 14px;
+    color: rgba(255,153,0,.45);
+}
+
+.mp-pick-opt {
     display: block;
     width: 100%;
     padding: 9px 16px;
@@ -154,13 +178,14 @@ td.col-cat:hover { background: rgba(255,153,0,.08); }
     text-align: left;
     border: none;
     background: transparent;
+    color: #FF9900;
 }
 
-.mp-cat-option:hover {
+.mp-pick-opt:hover {
     background: rgba(255,153,0,.12);
 }
 
-.mp-cat-option-clear {
+.mp-pick-clear {
     color: rgba(255,153,0,.45) !important;
     border-top: 1px solid rgba(255,153,0,.2);
     margin-top: 4px;
