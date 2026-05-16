@@ -231,3 +231,12 @@ function mpClosePicker(e) {
     document.getElementById('mp-picker-overlay').classList.remove('open');
     pickerCtx = null;
 }
+
+// ─── Week toggle ──────────────────────────────────────────────────────────────
+function mpSetWeek(week) {
+    document.getElementById('mp-block-current').style.display = week === 'current' ? '' : 'none';
+    document.getElementById('mp-block-next').style.display    = week === 'next'    ? '' : 'none';
+    document.querySelectorAll('.mp-nav-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.week === week);
+    });
+}

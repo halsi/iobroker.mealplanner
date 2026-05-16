@@ -43,6 +43,32 @@ html, body {
     gap: 20px;
 }
 
+/* ── Week toggle nav ───────────────────────────────────────────────────────── */
+#mp-nav {
+    display: flex;
+    gap: 8px;
+    padding: 10px 12px 0;
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.mp-nav-btn {
+    padding: 6px 18px;
+    border: 2px solid var(--mp-header-bg);
+    border-radius: 20px;
+    background: transparent;
+    color: var(--mp-header-bg);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+}
+
+.mp-nav-btn.active {
+    background: var(--mp-header-bg);
+    color: var(--mp-header-fg);
+}
+
 /* ── Week block ────────────────────────────────────────────────────────────── */
 .mp-week-block {
     border-radius: 8px;
