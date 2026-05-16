@@ -398,11 +398,35 @@ async function mpDoImport() {
     if (!csv) { mpToast('Bitte CSV-Daten eingeben', true); return; }
     const res = await mpSendTo('importCsv', { csv });
     if (res && res.error) { mpToast('Import fehlgeschlagen: ' + res.error, true); return; }
-    // Reload plan
     const planRes = await mpSendTo('getPlan', {});
     if (planRes && planRes.result) mp.plan = planRes.result;
     mpRenderWeekPlanner();
     mpToast('Import erfolgreich');
+}
+
+async function mpDoImportDishes() {
+    const csv = document.getElementById('mp-dishes-csv-area').value.trim();
+    if (!csv) { mpToast('Bitte CSV-Daten eingeben', true); return; }
+    const res = await mpSendTo('importDishes', { csv });
+    if (res && res.error) { mpToast('Import fehlgeschlagen: ' + res.error, true); return; }
+    const { imported, skipped } = (res && res.result) || {};
+    const dishRes = await mpSendTo('getDishes', {});
+    if (dishRes && dishRes.result) mp.dishes = dishRes.result;
+    mpRenderDishes();
+    mpRenderWeekPlanner();
+    mpToast(`${imported} Gerichte importiert, ${skipped} übersprungen`);
+}
+
+async function mpDoImportSides() {
+    const csv = document.getElementById('mp-sides-csv-area').value.trim();
+    if (!csv) { mpToast('Bitte CSV-Daten eingeben', true); return; }
+    const res = await mpSendTo('importSides', { csv });
+    if (res && res.error) { mpToast('Import fehlgeschlagen: ' + res.error, true); return; }
+    const { imported, skipped } = (res && res.result) || {};
+    const sideRes = await mpSendTo('getSides', {});
+    if (sideRes && sideRes.result) mp.sides = sideRes.result;
+    mpRenderSides();
+    mpToast(`${imported} Beilagen importiert, ${skipped} übersprungen`);
 }
 
 // Close modal on overlay click

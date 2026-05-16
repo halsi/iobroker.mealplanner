@@ -471,6 +471,59 @@ class MealplannerAdapter extends utils.Adapter {
                 break;
             }
 
+            case 'importDishes': {
+                const csv = (obj.message && obj.message.csv) || '';
+                const lines = csv.split('\n').map(l => l.trim()).filter(l => l && !l.startsWith('name'));
+                let imported = 0, skipped = 0;
+                for (const line of lines) {
+                    const parts = line.split(';');
+                    const name = (parts[0] || '').trim();
+                    if (!name) { skipped++; continue; }
+                    if (this.db.dishes.find(d => d.name.toLowerCase() === name.toLowerCase())) {
+                        skipped++;
+                        continue;
+                    }
+                    this.db.dishes.push({
+                        id: this.generateId(),
+                        name,
+                        kategorie: (parts[1] || '').trim(),
+                        portionen: parseInt(parts[2]) || 2,
+                        rezept_url: (parts[3] || '').trim()
+                    });
+                    imported++;
+                }
+                this.saveDb();
+                await this.updateDbCountStates();
+                this.sendTo(obj.from, obj.command, { result: { imported, skipped } }, obj.callback);
+                break;
+            }
+
+            case 'importSides': {
+                const csv = (obj.message && obj.message.csv) || '';
+                const lines = csv.split('\n').map(l => l.trim()).filter(l => l && !l.startsWith('name'));
+                let imported = 0, skipped = 0;
+                for (const line of lines) {
+                    const parts = line.split(';');
+                    const name = (parts[0] || '').trim();
+                    if (!name) { skipped++; continue; }
+                    if (this.db.sides.find(s => s.name.toLowerCase() === name.toLowerCase())) {
+                        skipped++;
+                        continue;
+                    }
+                    this.db.sides.push({
+                        id: this.generateId(),
+                        name,
+                        portionen: parseInt(parts[1]) || 2,
+                        rezept_url: (parts[2] || '').trim()
+                    });
+                    imported++;
+                }
+                this.saveDb();
+                await this.updateDbCountStates();
+                this.sendTo(obj.from, obj.command, { result: { imported, skipped } }, obj.callback);
+                break;
+            }
+
             default:
                 this.sendTo(obj.from, obj.command, { error: 'Unbekannter Befehl: ' + obj.command }, obj.callback);
         }

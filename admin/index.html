@@ -117,7 +117,7 @@
             </div>
 
             <div class="mp-section">
-                <h3 class="mp-section-title">CSV Import</h3>
+                <h3 class="mp-section-title">Wochenplan CSV Import</h3>
                 <p style="color:#616161;margin:0 0 8px 0;font-size:13px">
                     CSV-Daten einfügen und importieren. Gerichte und Beilagen müssen in der Datenbank vorhanden sein.
                 </p>
@@ -131,6 +131,48 @@
                         &#x21E7; Importieren
                     </button>
                     <button class="mp-btn mp-btn-secondary" onclick="document.getElementById('mp-csv-area').value=''">
+                        Leeren
+                    </button>
+                </div>
+            </div>
+
+            <div class="mp-section">
+                <h3 class="mp-section-title">Gerichte CSV Import</h3>
+                <p style="color:#616161;margin:0 0 8px 0;font-size:13px">
+                    Format: <code>name;kategorie;portionen;rezept_url</code><br>
+                    Kategorie: <code>vegetarisch</code>, <code>fisch</code>, <code>fleisch</code>, <code>extern</code>, <code>event</code><br>
+                    Bereits vorhandene Gerichte (gleicher Name) werden übersprungen.
+                </p>
+                <div class="mp-form-row">
+                    <label for="mp-dishes-csv-area">Gerichte CSV</label>
+                    <textarea id="mp-dishes-csv-area" class="mp-csv-area"
+                        placeholder="name;kategorie;portionen;rezept_url&#10;Pasta Bolognese;fleisch;2;&#10;Lachsfilet;fisch;2;&#10;Spinatknödel;vegetarisch;2;"></textarea>
+                </div>
+                <div class="mp-toolbar">
+                    <button class="mp-btn mp-btn-primary" onclick="mpDoImportDishes()">
+                        &#x21E7; Gerichte importieren
+                    </button>
+                    <button class="mp-btn mp-btn-secondary" onclick="document.getElementById('mp-dishes-csv-area').value=''">
+                        Leeren
+                    </button>
+                </div>
+            </div>
+
+            <div class="mp-section">
+                <h3 class="mp-section-title">Beilagen CSV Import</h3>
+                <p style="color:#616161;margin:0 0 8px 0;font-size:13px">
+                    Format: <code>name;portionen;rezept_url</code>
+                </p>
+                <div class="mp-form-row">
+                    <label for="mp-sides-csv-area">Beilagen CSV</label>
+                    <textarea id="mp-sides-csv-area" class="mp-csv-area"
+                        placeholder="name;portionen;rezept_url&#10;Reis;2;&#10;Nudeln;2;&#10;Salat;2;"></textarea>
+                </div>
+                <div class="mp-toolbar">
+                    <button class="mp-btn mp-btn-primary" onclick="mpDoImportSides()">
+                        &#x21E7; Beilagen importieren
+                    </button>
+                    <button class="mp-btn mp-btn-secondary" onclick="document.getElementById('mp-sides-csv-area').value=''">
                         Leeren
                     </button>
                 </div>
