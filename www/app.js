@@ -158,7 +158,16 @@ function getPicker() {
         el.id = 'mp-picker';
         el.className = 'mp-picker';
         document.body.appendChild(el);
-        el.addEventListener('click', e => e.stopPropagation());
+        el.addEventListener('click', e => {
+            e.stopPropagation();
+            const btn = e.target.closest('[data-action]');
+            if (!btn) return;
+            const action = btn.dataset.action;
+            const val    = btn.dataset.val;
+            if (action === 'cat')  selectCat(val);
+            if (action === 'dish') selectDish(val);
+            if (action === 'side') selectSide(val);
+        });
     }
     return el;
 }
@@ -198,10 +207,10 @@ function openCatPicker(e, day) {
     let html = cats.length === 0
         ? '<div class="mp-pick-empty">Keine Kategorien angelegt</div>'
         : cats.map(c =>
-            `<button class="mp-pick-opt" style="color:${c.color}" onclick="selectCat(${JSON.stringify(c.name)})">${esc(c.name)}</button>`
+            `<button class="mp-pick-opt" style="color:${c.color}" data-val="${esc(c.name)}" data-action="cat">${esc(c.name)}</button>`
           ).join('');
 
-    html += `<button class="mp-pick-opt mp-pick-clear" onclick="selectCat('')">— löschen —</button>`;
+    html += `<button class="mp-pick-opt mp-pick-clear" data-val="" data-action="cat">— löschen —</button>`;
     showPicker(e, day, html);
 }
 
@@ -246,10 +255,10 @@ function openDishPicker(e, day) {
         const catObj = db.categories.find(c => c.name === catName);
         const color  = catObj?.color || '#FF9900';
         html += dishes.map(d =>
-            `<button class="mp-pick-opt" style="color:${color}" onclick="selectDish(${JSON.stringify(d.id)})">${esc(d.name)}</button>`
+            `<button class="mp-pick-opt" style="color:${color}" data-val="${esc(d.id)}" data-action="dish">${esc(d.name)}</button>`
         ).join('');
     }
-    html += `<button class="mp-pick-opt mp-pick-clear" onclick="selectDish('')">— löschen —</button>`;
+    html += `<button class="mp-pick-opt mp-pick-clear" data-val="" data-action="dish">— löschen —</button>`;
     showPicker(e, day, html);
 }
 
@@ -276,10 +285,10 @@ function openSidePicker(e, day) {
         html += '<div class="mp-pick-empty">Keine Beilagen angelegt</div>';
     } else {
         html += db.sides.map(s =>
-            `<button class="mp-pick-opt" onclick="selectSide(${JSON.stringify(s.id)})">${esc(s.name)}</button>`
+            `<button class="mp-pick-opt" data-val="${esc(s.id)}" data-action="side">${esc(s.name)}</button>`
         ).join('');
     }
-    html += `<button class="mp-pick-opt mp-pick-clear" onclick="selectSide('')">— löschen —</button>`;
+    html += `<button class="mp-pick-opt mp-pick-clear" data-val="" data-action="side">— löschen —</button>`;
     showPicker(e, day, html);
 }
 
