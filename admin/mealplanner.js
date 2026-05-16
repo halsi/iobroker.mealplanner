@@ -34,8 +34,17 @@ let mp = {
 // ─── Utilities ───────────────────────────────────────────────────────────────
 
 function mpSendTo(command, message) {
-    return new Promise((resolve) => {
-        socket.emit('sendTo', `mealplanner.${instance}`, command, message, resolve);
+    return new Promise((resolve, reject) => {
+        const timeout = setTimeout(() => {
+            console.error(`[mealplanner] sendTo timeout: ${command}`);
+            reject(new Error(`Timeout bei Befehl: ${command}`));
+        }, 8000);
+        console.log(`[mealplanner] sendTo → mealplanner.${instance} | cmd: ${command}`);
+        socket.emit('sendTo', `mealplanner.${instance}`, command, message, (res) => {
+            clearTimeout(timeout);
+            console.log(`[mealplanner] sendTo ← ${command}:`, res);
+            resolve(res);
+        });
     });
 }
 
@@ -414,6 +423,7 @@ function mpInitModalClose() {
 // ─── Init ─────────────────────────────────────────────────────────────────────
 
 async function mpInit() {
+    console.log(`[mealplanner] mpInit() — instance=${instance}, socket connected=${socket && socket.connected}`);
     mpInitTabs();
     mpInitModalClose();
 
@@ -421,14 +431,14 @@ async function mpInit() {
 
     try {
         await mpLoadAll();
+        console.log('[mealplanner] Daten geladen:', mp);
     } catch (e) {
+        console.error('[mealplanner] Ladefehler:', e);
         document.getElementById('mp-root').innerHTML =
             `<div class="mp-empty" style="color:#c62828">Fehler beim Laden: ${mpEsc(e.message)}</div>`;
         return;
     }
 
-    // Rebuild the full UI (tabs were wiped by loading message — need static HTML instead)
-    // The static HTML is in index.html; here we just fill the dynamic parts
     mpRenderWeekPlanner();
     mpRenderDishes();
     mpRenderSides();

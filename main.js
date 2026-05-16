@@ -301,6 +301,7 @@ class MealplannerAdapter extends utils.Adapter {
 
     async onMessage(obj) {
         if (!obj || !obj.command) return;
+        this.log.debug(`onMessage: ${obj.command} from ${obj.from}`);
 
         switch (obj.command) {
             case 'getDishes':
