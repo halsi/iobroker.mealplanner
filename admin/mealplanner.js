@@ -3,17 +3,6 @@
 
 // ─── Constants ───────────────────────────────────────────────────────────────
 
-const MP_DAYS       = ['Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag','Sonntag'];
-const MP_TYPES      = ['normal','extern','event','leer'];
-const MP_CATEGORIES = ['vegetarisch','fisch','fleisch','extern','event'];
-
-const MP_TYPE_LABELS = {
-    normal: 'Normal',
-    extern: 'Auswärts',
-    event: 'Event',
-    leer: 'Leer'
-};
-
 const MP_CAT_LABELS = {
     vegetarisch: 'Vegetarisch',
     fisch: 'Fisch',
@@ -27,8 +16,6 @@ const MP_CAT_LABELS = {
 let mp = {
     dishes: [],
     sides: [],
-    plan: { current: null, next: null },
-    categories: MP_CATEGORIES,
 };
 
 // ─── Utilities ───────────────────────────────────────────────────────────────
@@ -46,11 +33,6 @@ function mpSendTo(command, message) {
             resolve(res);
         });
     });
-}
-
-function mpToday() {
-    const days = ['Sonntag','Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag'];
-    return days[new Date().getDay()];
 }
 
 function mpEsc(str) {
@@ -100,142 +82,12 @@ function mpInitTabs() {
 // ─── Data loading ─────────────────────────────────────────────────────────────
 
 async function mpLoadAll() {
-    const [dishRes, sideRes, planRes] = await Promise.all([
+    const [dishRes, sideRes] = await Promise.all([
         mpSendTo('getDishes', {}),
         mpSendTo('getSides', {}),
-        mpSendTo('getPlan', {}),
     ]);
     if (dishRes && dishRes.result) mp.dishes = dishRes.result;
     if (sideRes && sideRes.result) mp.sides = sideRes.result;
-    if (planRes && planRes.result) mp.plan = planRes.result;
-}
-
-// ─── Week planner ─────────────────────────────────────────────────────────────
-
-function mpBuildDishOptions(selectedId, includeEmpty) {
-    let html = includeEmpty ? '<option value="">— kein Gericht —</option>' : '';
-    for (const d of mp.dishes) {
-        html += `<option value="${mpEsc(d.id)}" ${d.id === selectedId ? 'selected' : ''}>${mpEsc(d.name)}</option>`;
-    }
-    return html;
-}
-
-function mpBuildSideOptions(selectedId, includeEmpty) {
-    let html = includeEmpty ? '<option value="">— keine Beilage —</option>' : '';
-    for (const s of mp.sides) {
-        html += `<option value="${mpEsc(s.id)}" ${s.id === selectedId ? 'selected' : ''}>${mpEsc(s.name)}</option>`;
-    }
-    return html;
-}
-
-function mpBuildTypeOptions(selectedType) {
-    return MP_TYPES.map(t =>
-        `<option value="${t}" ${t === (selectedType || 'normal') ? 'selected' : ''}>${MP_TYPE_LABELS[t] || t}</option>`
-    ).join('');
-}
-
-function mpRenderWeekTable(weekData, weekLabel, tableId) {
-    const today = mpToday();
-    const days = weekData ? weekData.days : {};
-    const kw   = weekData ? weekData.kw : '?';
-    const key  = weekData ? weekData.key : '';
-
-    let rows = '';
-    for (const day of MP_DAYS) {
-        const entry = days[day] || {};
-        const isToday = (weekLabel === 'current' && day === today);
-        rows += `
-        <tr class="${isToday ? 'today' : ''}" data-week="${weekLabel}" data-day="${mpEsc(day)}" data-key="${mpEsc(key)}">
-            <td class="col-day">${mpEsc(day)}${isToday ? ' &#x2605;' : ''}</td>
-            <td class="col-main">
-                <select class="mp-plan-main" onchange="mpPlanChange(this)">
-                    ${mpBuildDishOptions(entry.hauptspeise_id, true)}
-                </select>
-            </td>
-            <td class="col-side">
-                <select class="mp-plan-side" onchange="mpPlanChange(this)">
-                    ${mpBuildSideOptions(entry.beilage_id, true)}
-                </select>
-            </td>
-            <td class="col-type">
-                <select class="mp-plan-type" onchange="mpPlanChange(this)">
-                    ${mpBuildTypeOptions(entry.typ)}
-                </select>
-            </td>
-            <td class="col-note">
-                <input type="text" class="mp-plan-note" value="${mpEsc(entry.notiz || '')}"
-                    placeholder="Notiz..." onchange="mpPlanChange(this)">
-            </td>
-            <td class="col-action">
-                <button class="mp-btn-icon" title="Zufallsvorschlag" onclick="mpSuggestDay('${weekLabel}','${mpEsc(day)}','${mpEsc(key)}')">&#x1F3B2;</button>
-            </td>
-        </tr>`;
-    }
-
-    document.getElementById(tableId).innerHTML = `
-        <thead>
-            <tr>
-                <th class="col-day">Tag</th>
-                <th class="col-main">Hauptspeise</th>
-                <th class="col-side">Beilage</th>
-                <th class="col-type">Typ</th>
-                <th class="col-note">Notiz</th>
-                <th class="col-action"></th>
-            </tr>
-        </thead>
-        <tbody>${rows}</tbody>`;
-
-    document.getElementById(tableId + '-kw').textContent = `KW ${kw}`;
-}
-
-function mpRenderWeekPlanner() {
-    mpRenderWeekTable(mp.plan.current, 'current', 'mp-table-current');
-    mpRenderWeekTable(mp.plan.next, 'next', 'mp-table-next');
-}
-
-async function mpPlanChange(el) {
-    const row = el.closest('tr');
-    const day = row.dataset.day;
-    const key = row.dataset.key;
-
-    const hauptspeise_id = row.querySelector('.mp-plan-main').value;
-    const beilage_id     = row.querySelector('.mp-plan-side').value;
-    const typ            = row.querySelector('.mp-plan-type').value;
-    const notiz          = row.querySelector('.mp-plan-note').value;
-
-    const res = await mpSendTo('savePlanEntry', {
-        weekKey: key,
-        day,
-        entry: { hauptspeise_id, beilage_id, typ, notiz }
-    });
-    if (res && res.error) {
-        mpToast('Fehler: ' + res.error, true);
-    }
-    // Update local plan cache
-    if (mp.plan.current && mp.plan.current.key === key) {
-        if (!mp.plan.current.days) mp.plan.current.days = {};
-        mp.plan.current.days[day] = { hauptspeise_id, beilage_id, typ, notiz };
-    }
-    if (mp.plan.next && mp.plan.next.key === key) {
-        if (!mp.plan.next.days) mp.plan.next.days = {};
-        mp.plan.next.days[day] = { hauptspeise_id, beilage_id, typ, notiz };
-    }
-}
-
-async function mpSuggestDay(weekLabel, day, weekKey) {
-    if (!mp.dishes.length) { mpToast('Keine Gerichte in der Datenbank', true); return; }
-    const random = mp.dishes[Math.floor(Math.random() * mp.dishes.length)];
-    const res = await mpSendTo('savePlanEntry', {
-        weekKey,
-        day,
-        entry: { hauptspeise_id: random.id }
-    });
-    if (res && res.error) { mpToast('Fehler: ' + res.error, true); return; }
-    // Refresh from server
-    const planRes = await mpSendTo('getPlan', {});
-    if (planRes && planRes.result) mp.plan = planRes.result;
-    mpRenderWeekPlanner();
-    mpToast(`${day}: ${random.name}`);
 }
 
 // ─── Dishes tab ───────────────────────────────────────────────────────────────
@@ -267,7 +119,6 @@ async function mpDeleteSelectedDishes() {
     if (dishRes && dishRes.result) mp.dishes = dishRes.result;
     document.getElementById('mp-dishes-check-all').checked = false;
     mpRenderDishes();
-    mpRenderWeekPlanner();
     mpToast(`${ids.length} Gericht(e) gelöscht`);
 }
 
@@ -320,11 +171,9 @@ async function mpSaveDish() {
     const res = await mpSendTo('saveDish', dish);
     if (res && res.error) { mpToast('Fehler: ' + res.error, true); return; }
     mpCloseDishModal();
-    // Reload
     const dishRes = await mpSendTo('getDishes', {});
     if (dishRes && dishRes.result) mp.dishes = dishRes.result;
     mpRenderDishes();
-    mpRenderWeekPlanner(); // refresh selects
     mpToast('Gericht gespeichert');
 }
 
@@ -335,7 +184,6 @@ async function mpDeleteDish(id, name) {
     const dishRes = await mpSendTo('getDishes', {});
     if (dishRes && dishRes.result) mp.dishes = dishRes.result;
     mpRenderDishes();
-    mpRenderWeekPlanner();
     mpToast('Gericht gelöscht');
 }
 
@@ -372,7 +220,6 @@ async function mpDeleteSelectedSides() {
     if (sideRes && sideRes.result) mp.sides = sideRes.result;
     document.getElementById('mp-sides-check-all').checked = false;
     mpRenderSides();
-    mpRenderWeekPlanner();
     mpToast(`${ids.length} Beilage(n) gelöscht`);
 }
 
@@ -425,7 +272,6 @@ async function mpSaveSide() {
     const sideRes = await mpSendTo('getSides', {});
     if (sideRes && sideRes.result) mp.sides = sideRes.result;
     mpRenderSides();
-    mpRenderWeekPlanner();
     mpToast('Beilage gespeichert');
 }
 
@@ -436,7 +282,6 @@ async function mpDeleteSide(id, name) {
     const sideRes = await mpSendTo('getSides', {});
     if (sideRes && sideRes.result) mp.sides = sideRes.result;
     mpRenderSides();
-    mpRenderWeekPlanner();
     mpToast('Beilage gelöscht');
 }
 
@@ -468,10 +313,7 @@ async function mpDoImport() {
     if (!csv) { mpToast('Bitte CSV-Daten eingeben', true); return; }
     const res = await mpSendTo('importCsv', { csv });
     if (res && res.error) { mpToast('Import fehlgeschlagen: ' + res.error, true); return; }
-    const planRes = await mpSendTo('getPlan', {});
-    if (planRes && planRes.result) mp.plan = planRes.result;
-    mpRenderWeekPlanner();
-    mpToast('Import erfolgreich');
+    mpToast('Wochenplan importiert');
 }
 
 async function mpDoImportDishes() {
@@ -517,22 +359,16 @@ function mpInitModalClose() {
 // ─── Init ─────────────────────────────────────────────────────────────────────
 
 async function mpInit() {
-    console.log(`[mealplanner] mpInit() — instance=${instance}, socket connected=${socket && socket.connected}`);
     mpInitTabs();
     mpInitModalClose();
 
     try {
         await mpLoadAll();
-        console.log('[mealplanner] Daten geladen:', mp);
     } catch (e) {
         console.error('[mealplanner] Ladefehler:', e);
-        document.getElementById('mp-root').innerHTML =
-            `<div class="mp-empty" style="color:#c62828">Fehler beim Laden: ${mpEsc(e.message)}</div>`;
         return;
     }
 
-    mpRenderWeekPlanner();
     mpRenderDishes();
     mpRenderSides();
-    window._mpInitDone = true;
 }

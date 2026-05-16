@@ -16,41 +16,13 @@
 
     <!-- Tab bar -->
     <nav class="mp-tabs">
-        <div class="mp-tab active" data-panel="mp-panel-planner">Wochenplaner</div>
-        <div class="mp-tab" data-panel="mp-panel-dishes">Gerichte</div>
+        <div class="mp-tab active" data-panel="mp-panel-dishes">Gerichte</div>
         <div class="mp-tab" data-panel="mp-panel-sides">Beilagen</div>
         <div class="mp-tab" data-panel="mp-panel-ie">Import/Export</div>
     </nav>
 
-    <!-- ── Tab: Wochenplaner ───────────────────────────────────────────────── -->
-    <div id="mp-panel-planner" class="mp-panel active">
-
-        <div class="mp-section">
-            <div class="mp-section-title">
-                Diese Woche &nbsp;<span id="mp-table-current-kw" style="font-weight:normal;font-size:13px;color:#757575"></span>
-            </div>
-            <div style="overflow-x:auto">
-                <table id="mp-table-current" class="mp-week-table">
-                    <tbody><tr><td colspan="6" class="mp-loading">Lade...</td></tr></tbody>
-                </table>
-            </div>
-        </div>
-
-        <div class="mp-section">
-            <div class="mp-section-title">
-                Nächste Woche &nbsp;<span id="mp-table-next-kw" style="font-weight:normal;font-size:13px;color:#757575"></span>
-            </div>
-            <div style="overflow-x:auto">
-                <table id="mp-table-next" class="mp-week-table">
-                    <tbody><tr><td colspan="6" class="mp-loading">Lade...</td></tr></tbody>
-                </table>
-            </div>
-        </div>
-
-    </div>
-
     <!-- ── Tab: Gerichte ──────────────────────────────────────────────────── -->
-    <div id="mp-panel-dishes" class="mp-panel">
+    <div id="mp-panel-dishes" class="mp-panel active">
 
         <div class="mp-toolbar">
             <button class="mp-btn mp-btn-primary" onclick="mpEditDish(null)">
@@ -114,7 +86,7 @@
         <div class="mp-ie-section">
 
             <div class="mp-section">
-                <h3 class="mp-section-title">CSV Export</h3>
+                <h3 class="mp-section-title">Wochenplan CSV Export</h3>
                 <p style="color:#616161;margin:0 0 12px 0;font-size:13px">
                     Exportiert den Wochenplan der aktuellen und nächsten Woche als CSV-Datei.<br>
                     Format: <code>kw;wochentag;hauptspeise;beilage;typ;notiz</code>
@@ -263,34 +235,18 @@
 
 <script src="mealplanner.js"></script>
 <script>
-    // ioBroker admin integration
     var socket;
     var instance;
     var systemLang = 'de';
 
     document.addEventListener('DOMContentLoaded', function () {
-        // Read instance number from URL (?instance=0)
         var urlParams = new URLSearchParams(window.location.search);
         instance = urlParams.get('instance') || '0';
-        console.log('[mp] instance=' + instance);
 
         if (typeof io !== 'undefined') {
             socket = io.connect();
-            console.log('[mp] socket created, waiting for connect...');
             socket.on('connect', function () {
-                console.log('[mp] socket connected! id=' + socket.id);
-                // Quick ping test before full init
-                console.log('[mp] sending test sendTo → mealplanner.' + instance);
-                socket.emit('sendTo', 'mealplanner.' + instance, 'getDishes', {}, function(res) {
-                    console.log('[mp] TEST sendTo callback fired! res=', res);
-                    mpInit();
-                });
-                // Timeout guard — only fires if mpInit never ran
-                setTimeout(function() {
-                    if (!window._mpInitDone) {
-                        console.error('[mp] TIMEOUT: mpInit did not complete within 8s');
-                    }
-                }, 8000);
+                mpInit();
             });
             socket.on('disconnect', function(reason) {
                 console.warn('[mp] socket disconnected:', reason);
@@ -299,11 +255,8 @@
                 console.error('[mp] connect_error:', err);
             });
         } else {
-            // Fallback for development / standalone preview
-            console.warn('socket.io not available — running in standalone mode');
             socket = {
                 emit: function (event, adapter, cmd, msg, cb) {
-                    console.log('[socket.emit]', event, adapter, cmd, msg);
                     if (cb) cb({ result: [] });
                 }
             };
@@ -311,11 +264,8 @@
         }
     });
 
-    // translateAll is provided by translate.js (ioBroker)
     if (typeof translateAll === 'function') {
-        document.addEventListener('DOMContentLoaded', function () {
-            translateAll();
-        });
+        document.addEventListener('DOMContentLoaded', function () { translateAll(); });
     }
 </script>
 
