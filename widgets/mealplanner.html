@@ -52,4 +52,5 @@
     data-vis-name="Speiseplan 2 Wochen"
     data-vis-attrs="">
 <div class="vis-widget <%== this.data.attr('class') %>" id="<%= this.data.attr('wid') %>" style="width: 300px; height: 80px; overflow: hidden;"></div>
+<% var _w=this.data.attr('wid'); setTimeout(function(){ vis.binds['mealplanner'].createWidget(_w,null,null,null); },100); %>
 </script>
