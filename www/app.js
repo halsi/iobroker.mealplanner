@@ -275,7 +275,7 @@ function openCatPicker(e, day) {
     el.appendChild(pickerClear(() => {
         const entry = dayEntry(day);
         delete entry.kategorie;
-        markDirty();
+        savePlan();
         render();
     }));
 }
@@ -311,7 +311,7 @@ function openDishPicker(e, day) {
     el.appendChild(pickerClear(() => {
         const entry2 = dayEntry(day);
         entry2.hauptspeise_id = '';
-        markDirty();
+        savePlan();
         render();
     }));
 }
@@ -339,7 +339,7 @@ function openSidePicker(e, day) {
     el.appendChild(pickerClear(() => {
         const entry = dayEntry(day);
         entry.beilage_id = '';
-        markDirty();
+        savePlan();
         render();
     }));
 }
