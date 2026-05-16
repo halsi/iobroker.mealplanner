@@ -1,98 +1,112 @@
-# ioBroker Mealplanner Adapter
+# iobroker.mealplanner
 
-Essensplaner für 2 Personen — verwaltet den Wochenplan der aktuellen und nächsten Woche, eine Gerichtedatenbank und eine Beilagendatenbank.
+Essensplaner-Adapter für ioBroker — Wochenplanung für zwei Personen, Gerichtsdatenbank, Kategorien, CSV Import/Export.
 
-## Installation
+---
 
-```bash
-cd /opt/iobroker
-npm install /path/to/iobroker.mealplanner
-iobroker add mealplanner
+## Datenspeicherung
+
+Alle Daten werden in zwei ioBroker-States gespeichert:
+
+### `mealplanner.0.info.database` (read/write, JSON)
+
+Enthält die gesamte Datenbank:
+
+```json
+{
+  "dishes": [
+    { "id": "mp8cprtq6qdu", "name": "Spaghetti Carbonara", "kategorie": "Fleisch", "tags": [] }
+  ],
+  "sides": [
+    { "id": "mp8cprtqabcd", "name": "Salat", "tags": [] }
+  ],
+  "categories": [
+    { "name": "Vegetarisch", "color": "#43a047" },
+    { "name": "Fisch",       "color": "#0288d1" },
+    { "name": "Fleisch",     "color": "#e53935" },
+    { "name": "Extern",      "color": "#f9a825" }
+  ]
+}
 ```
 
-## Konfiguration
+### `mealplanner.0.info.plan_json` (read/write, JSON)
 
-Im Admin-Panel gibt es 4 Tabs:
+Enthält den aktuellen Wochenplan:
 
-| Tab | Funktion |
-|-----|----------|
-| **Wochenplaner** | Hauptspeise, Beilage, Typ und Notiz pro Tag eintragen. Würfel-Button für Zufallsvorschlag. |
-| **Gerichte** | Gerichtedatenbank pflegen (Name, Kategorie, Rezept-URL, Portionen) |
-| **Beilagen** | Beilagendatenbank pflegen |
-| **Import/Export** | Wochenplan als CSV exportieren / importieren |
-
-## Datenpunkte
-
-### Heutige Werte (read-only, aktualisiert um 00:01 Uhr)
-
-| Datenpunkt | Typ | Beschreibung |
-|------------|-----|--------------|
-| `today.main` | string | Hauptspeise ID |
-| `today.main_name` | string | Hauptspeise Name |
-| `today.side` | string | Beilage ID |
-| `today.side_name` | string | Beilage Name |
-| `today.category` | string | Kategorie |
-| `today.type` | string | Typ (normal/extern/event/leer) |
-| `today.note` | string | Notiz |
-
-### Wochenplan
-
-Für `week.current.{Tag}.*` und `week.next.{Tag}.*` (Tag = Montag … Sonntag):
-
-| Suffix | Beschreibung |
-|--------|--------------|
-| `.main` | Hauptspeise ID |
-| `.main_name` | Hauptspeise Name |
-| `.side` | Beilage ID |
-| `.side_name` | Beilage Name |
-| `.category` | Kategorie |
-| `.type` | Typ |
-| `.note` | Notiz |
-
-### Befehle
-
-| Datenpunkt | Beschreibung |
-|------------|--------------|
-| `cmd.suggest` | `true` schreiben → Zufallsvorschlag für heute |
-| `cmd.export` | `true` schreiben → CSV-Export (Ausgabe ins Log) |
-| `cmd.import` | CSV-String schreiben → Import |
-
-### Info
-
-| Datenpunkt | Beschreibung |
-|------------|--------------|
-| `info.current_kw` | Aktuelle Kalenderwoche |
-| `info.next_kw` | Nächste Kalenderwoche |
-| `info.db_dishes` | Anzahl Gerichte |
-| `info.db_sides` | Anzahl Beilagen |
-| `info.last_export` | ISO-Zeitstempel des letzten Exports |
-
-## Datenbank
-
-Die JSON-Datenbank liegt unter:
-```
-/opt/iobroker/iobroker-data/mealplanner/database.json
+```json
+{
+  "current": {
+    "kw": 20,
+    "days": {
+      "Montag":     { "hauptspeise_id": "mp8cprtq6qdu", "beilage_id": "mp8cprtqabcd" },
+      "Dienstag":   { "hauptspeise_id": "", "beilage_id": "" },
+      "Mittwoch":   { "hauptspeise_id": "", "beilage_id": "" },
+      "Donnerstag": { "hauptspeise_id": "", "beilage_id": "" },
+      "Freitag":    { "hauptspeise_id": "", "beilage_id": "" },
+      "Samstag":    { "hauptspeise_id": "", "beilage_id": "" },
+      "Sonntag":    { "hauptspeise_id": "", "beilage_id": "" }
+    }
+  },
+  "next": {
+    "kw": 21,
+    "days": { "..." : "..." }
+  }
+}
 ```
 
-## CSV-Format
+---
 
-```
-kw;wochentag;hauptspeise;beilage;typ;notiz
-20;Montag;Pasta Bolognese;Salat;normal;
-20;Dienstag;Fischstäbchen;Kartoffeln;normal;Kinder mögen das
-```
+## States-Übersicht
 
-## Typen
+| State | Typ | Beschreibung |
+|-------|-----|--------------|
+| `info.database` | JSON string | Gesamte Datenbank (Gerichte, Beilagen, Kategorien) |
+| `info.plan_json` | JSON string | Wochenplan (aktuelle + nächste Woche) |
+| `week.current.<Tag>.main` | string | Hauptspeise-ID (diese Woche) |
+| `week.current.<Tag>.main_name` | string | Hauptspeise-Name |
+| `week.current.<Tag>.side` | string | Beilage-ID |
+| `week.current.<Tag>.side_name` | string | Beilage-Name |
+| `week.current.<Tag>.category` | string | Kategorie |
+| `week.next.<Tag>.*` | — | Gleiche Felder für nächste Woche |
+| `today.main` / `today.main_name` | string | Heutiges Gericht |
+| `today.side` / `today.side_name` | string | Heutige Beilage |
+| `today.category` | string | Heutige Kategorie |
+| `info.current_kw` | number | Aktuelle Kalenderwoche |
+| `info.next_kw` | number | Nächste Kalenderwoche |
+| `info.db_dishes` | number | Anzahl Gerichte |
+| `info.db_sides` | number | Anzahl Beilagen |
+| `cmd.suggest` | button | Zufallsvorschlag für heute auslösen |
+| `cmd.export` | button | CSV Export auslösen |
+| `cmd.import` | string | CSV Daten importieren |
 
-- `normal` — normaler Tag
-- `extern` — Auswärts essen
-- `event` — besonderer Anlass
-- `leer` — kein Eintrag
+---
 
-## Kategorien (Gerichte)
+## Admin-UI
 
-`vegetarisch` | `fisch` | `fleisch` | `extern` | `event`
+Erreichbar über den ioBroker Admin unter dem Mealplanner-Adapter.
 
-## Lizenz
+Tabs:
+- **Gerichte** — Gerichte anlegen, bearbeiten, löschen, CSV Import/Export
+- **Beilagen** — Beilagen verwalten
+- **Kategorien** — Kategorien mit Farbe anlegen und verwalten
+- **Import/Export** — Gesamtdaten als CSV exportieren/importieren
 
-MIT — Wolfgang Halbartschlager
+---
+
+## Adapter-Kommunikation (sendTo)
+
+Der Admin kommuniziert über `sendTo`-Messages mit dem Adapter:
+
+| Command | Beschreibung |
+|---------|--------------|
+| `getDishes` | Alle Gerichte laden |
+| `saveDish` | Gericht speichern (neu oder update per ID) |
+| `deleteDish` | Gericht löschen |
+| `getSides` | Alle Beilagen laden |
+| `saveSide` | Beilage speichern |
+| `deleteSide` | Beilage löschen |
+| `getCategories` | Kategorien laden |
+| `saveCategory` | Kategorie speichern (Umbenennung cascadiert auf alle Gerichte) |
+| `deleteCategory` | Kategorie löschen |
+| `importCsv` | CSV importieren |
+| `exportCsv` | CSV exportieren |
