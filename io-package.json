@@ -1,8 +1,12 @@
 {
   "common": {
     "name": "mealplanner",
-    "version": "0.3.0",
+    "version": "1.0.0",
     "news": {
+      "1.0.0": {
+        "en": "Mobile view, home screen icon, picker settings, Extern category disables side dish",
+        "de": "Mobile-Ansicht, Home-Screen-Icon, Picker-Einstellungen, Kategorie Extern deaktiviert Beilage"
+      },
       "0.2.0": {
         "en": "Column layout: Kategorie column, fixed file upload namespace",
         "de": "Neue Spalte Kategorie, korrekter Upload-Namespace"
@@ -728,6 +732,12 @@
       "_id": "info.plan_json",
       "type": "state",
       "common": { "name": "Wochenplan (JSON)", "type": "string", "role": "json", "read": true, "write": true, "def": "{}" },
+      "native": {}
+    },
+    {
+      "_id": "info.settings",
+      "type": "state",
+      "common": { "name": "Widget-Einstellungen (JSON)", "type": "string", "role": "json", "read": true, "write": true, "def": "{}" },
       "native": {}
     }
   ]
