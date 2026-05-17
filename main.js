@@ -13,11 +13,25 @@ const DEFAULT_CATEGORIES = [
     { name: 'Extern',      color: '#f9a825' },
 ];
 
+const DEFAULT_SETTINGS = {
+    widget: { width: 1480, height: 650 },
+    fonts: {
+        kw_label:   { size: 26, color: '#FFCC99' },
+        date_range: { size: 17, color: '#FFCC99' },
+        col_header: { size: 12, color: '#FFCC99' },
+        day_name:   { size: 17, color: '#FF9900' },
+        day_date:   { size: 13, color: '#886600' },
+        category:   { size: 17, color: '#FF9900' },
+        dish:       { size: 17, color: '#FF9900' },
+        side:       { size: 17, color: '#FF9900' },
+    }
+};
+
 class MealplannerAdapter extends utils.Adapter {
     constructor(options) {
         super({ ...options, name: 'mealplanner' });
         this.dbPath = null;
-        this.db = { dishes: [], sides: [], plan: {}, categories: [] };
+        this.db = { dishes: [], sides: [], plan: {}, categories: [], settings: null };
         this.midnightTimer = null;
         this.on('ready', this.onReady.bind(this));
         this.on('stateChange', this.onStateChange.bind(this));
@@ -43,10 +57,11 @@ class MealplannerAdapter extends utils.Adapter {
                 if (!this.db.sides)      this.db.sides      = [];
                 if (!this.db.plan)       this.db.plan       = {};
                 if (!this.db.categories) this.db.categories = DEFAULT_CATEGORIES.map(c => ({ id: this.generateId(), ...c }));
+                if (!this.db.settings)  this.db.settings  = JSON.parse(JSON.stringify(DEFAULT_SETTINGS));
             }
         } catch (e) {
             this.log.warn('DB load failed, starting fresh: ' + e.message);
-            this.db = { dishes: [], sides: [], plan: {}, categories: DEFAULT_CATEGORIES.map(c => ({ id: this.generateId(), ...c })) };
+            this.db = { dishes: [], sides: [], plan: {}, categories: DEFAULT_CATEGORIES.map(c => ({ id: this.generateId(), ...c })), settings: JSON.parse(JSON.stringify(DEFAULT_SETTINGS)) };
         }
     }
 
@@ -61,6 +76,7 @@ class MealplannerAdapter extends utils.Adapter {
                 val: JSON.stringify({ dishes: this.db.dishes, sides: this.db.sides, categories: this.db.categories }),
                 ack: true
             });
+            this.setState('info.settings', { val: JSON.stringify(this.db.settings), ack: true });
         } catch (e) {
             this.log.error('DB save failed: ' + e.message);
         }
@@ -121,6 +137,10 @@ class MealplannerAdapter extends utils.Adapter {
         await this.setStateAsync('info.db_sides', { val: this.db.sides.length, ack: true });
         await this.setStateAsync('info.database', {
             val: JSON.stringify({ dishes: this.db.dishes, sides: this.db.sides, categories: this.db.categories }),
+            ack: true
+        });
+        await this.setStateAsync('info.settings', {
+            val: JSON.stringify(this.db.settings),
             ack: true
         });
 
@@ -610,6 +630,17 @@ class MealplannerAdapter extends utils.Adapter {
                 this.saveDb();
                 await this.updateDbCountStates();
                 this.sendTo(obj.from, obj.command, { result: { imported, skipped } }, obj.callback);
+                break;
+            }
+
+            case 'getSettings':
+                this.sendTo(obj.from, obj.command, { result: this.db.settings }, obj.callback);
+                break;
+
+            case 'saveSettings': {
+                this.db.settings = obj.message;
+                this.saveDb();
+                this.sendTo(obj.from, obj.command, { result: this.db.settings }, obj.callback);
                 break;
             }
 
