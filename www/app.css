@@ -1,16 +1,31 @@
+:root {
+    --mp-w:       1480px;
+    --mp-h:       650px;
+    --mp-fs-kw:   26px;  --mp-c-kw:   #FFCC99;
+    --mp-fs-dr:   17px;  --mp-c-dr:   #FFCC99;
+    --mp-fs-ch:   12px;  --mp-c-ch:   #FFCC99;
+    --mp-fs-dn:   17px;  --mp-c-dn:   #FF9900;
+    --mp-fs-dd:   13px;  --mp-c-dd:   #886600;
+    --mp-fs-cat:  17px;  --mp-c-cat:  #FF9900;
+    --mp-fs-dish: 17px;  --mp-c-dish: #FF9900;
+    --mp-fs-side: 17px;  --mp-c-side: #FF9900;
+}
+
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     background: transparent;
     color: #FF9900;
-    width: 1780px;
-    overflow-x: hidden;
+    width: var(--mp-w);
+    overflow: hidden;
 }
 
 #mp-app {
-    width: 1780px;
+    width: var(--mp-w);
+    height: var(--mp-h);
     padding: 16px 20px;
+    overflow: hidden;
 }
 
 /* ── Header ── */
@@ -23,15 +38,15 @@ body {
 }
 
 #mp-kw-label {
-    font-size: 26px;
+    font-size: var(--mp-fs-kw);
     font-weight: 700;
-    color: #FFCC99;
+    color: var(--mp-c-kw);
 }
 
 #mp-date-range {
-    font-size: 17px;
+    font-size: var(--mp-fs-dr);
     font-weight: 700;
-    color: #FFCC99;
+    color: var(--mp-c-dr);
 }
 
 /* ── Table ── */
@@ -42,8 +57,8 @@ body {
 }
 
 #mp-table thead th {
-    color: #FFCC99;
-    font-size: 12px;
+    color: var(--mp-c-ch);
+    font-size: var(--mp-fs-ch);
     font-weight: 700;
     letter-spacing: .07em;
     text-transform: uppercase;
@@ -71,10 +86,12 @@ body {
 
 #mp-table tbody td {
     padding: 12px 16px;
-    font-size: 17px;
     vertical-align: middle;
-    color: #FF9900;
 }
+
+.col-cat  { font-size: var(--mp-fs-cat);  color: var(--mp-c-cat);  }
+.col-main { font-size: var(--mp-fs-dish); color: var(--mp-c-dish); }
+.col-side { font-size: var(--mp-fs-side); color: var(--mp-c-side); }
 
 /* ── Columns ── */
 
@@ -88,14 +105,14 @@ body {
 .day-name {
     display: block;
     font-weight: 600;
-    font-size: 17px;
-    color: #FF9900;
+    font-size: var(--mp-fs-dn);
+    color: var(--mp-c-dn);
 }
 
 .day-date {
     display: block;
-    font-size: 13px;
-    color: rgba(255,153,0,.55);
+    font-size: var(--mp-fs-dd);
+    color: var(--mp-c-dd);
     margin-top: 2px;
 }
 
