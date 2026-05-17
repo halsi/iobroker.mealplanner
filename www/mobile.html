@@ -112,12 +112,6 @@
 
         .day-card.today .day-name { color: var(--c-primary); }
 
-        .day-date {
-            font-size: 11px;
-            color: rgba(255,153,0,0.4);
-            margin-top: 1px;
-        }
-
         /* ── Slot rows ── */
         .slot-row {
             display: flex;
@@ -533,14 +527,10 @@ function render() {
         hdr.className = 'day-header';
         const dn = document.createElement('div');
         dn.className = 'day-name';
-        dn.textContent = day;
+        dn.textContent = monDate
+            ? day + ' — ' + fmt(new Date(monDate.getTime() + i * 86400000))
+            : day;
         hdr.appendChild(dn);
-        if (monDate) {
-            const dd = document.createElement('div');
-            dd.className = 'day-date';
-            dd.textContent = fmt(new Date(monDate.getTime() + i * 86400000));
-            hdr.appendChild(dd);
-        }
         card.appendChild(hdr);
 
         // Category slot
