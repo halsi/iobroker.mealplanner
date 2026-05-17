@@ -431,6 +431,62 @@ function mpInitModalClose() {
     });
 }
 
+// ─── Settings ─────────────────────────────────────────────────────────────────
+
+const FONT_KEYS = ['kw_label','date_range','col_header','day_name','day_date','category','dish','side'];
+
+async function mpLoadSettings() {
+    const res = await mpSendTo('getSettings', {});
+    const s = (res && res.result) || {};
+    const w = s.widget || {};
+    const f = s.fonts  || {};
+    document.getElementById('mp-set-width').value  = w.width  || 1480;
+    document.getElementById('mp-set-height').value = w.height || 650;
+    for (const key of FONT_KEYS) {
+        const el = f[key] || {};
+        const fsEl = document.getElementById('mp-set-fs-' + key);
+        const cEl  = document.getElementById('mp-set-c-'  + key);
+        if (fsEl) fsEl.value = el.size  || '';
+        if (cEl)  cEl.value  = el.color || '#FF9900';
+    }
+    await mpLoadWidgetUrl();
+}
+
+async function mpLoadWidgetUrl() {
+    let port = 8082;
+    try {
+        await new Promise(resolve => {
+            socket.emit('getObject', 'system.adapter.web.0', (err, obj) => {
+                if (obj && obj.native && obj.native.port) port = obj.native.port;
+                resolve();
+            });
+        });
+    } catch (e) { /* use default port */ }
+    const host = location.hostname;
+    const base = `http://${host}:${port}/mealplanner/plan.html`;
+    document.getElementById('mp-url-current').textContent = base + '?week=current';
+    document.getElementById('mp-url-next').textContent    = base + '?week=next';
+}
+
+async function mpSaveSettings() {
+    const settings = {
+        widget: {
+            width:  parseInt(document.getElementById('mp-set-width').value)  || 1480,
+            height: parseInt(document.getElementById('mp-set-height').value) || 650,
+        },
+        fonts: {}
+    };
+    for (const key of FONT_KEYS) {
+        settings.fonts[key] = {
+            size:  parseInt(document.getElementById('mp-set-fs-' + key).value) || 17,
+            color: document.getElementById('mp-set-c-' + key).value || '#FF9900',
+        };
+    }
+    const res = await mpSendTo('saveSettings', settings);
+    if (res && res.error) { mpToast('Fehler: ' + res.error, true); return; }
+    mpToast('Einstellungen gespeichert');
+}
+
 // ─── Sort & Save ─────────────────────────────────────────────────────────────
 
 async function mpSortAndSave() {
@@ -467,4 +523,5 @@ async function mpInit() {
     mpRenderDishes();
     mpRenderSides();
     mpRenderCategories();
+    await mpLoadSettings();
 }
