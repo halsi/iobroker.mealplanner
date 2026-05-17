@@ -404,7 +404,7 @@
     <div id="add-body">
         <div id="add-cat-row">
             <select id="add-cat">
-                <option value="">— Kategorie wählen —</option>
+                <option value="">Kategorie wählen</option>
             </select>
         </div>
         <input type="text" id="add-name" placeholder="Name eingeben…"
@@ -720,7 +720,7 @@ function openAddSheet(type) {
     const catSel = document.getElementById('add-cat');
     if (type === 'dish') {
         catRow.style.display = 'block';
-        catSel.innerHTML = '<option value="">— Kategorie wählen —</option>' +
+        catSel.innerHTML = '<option value="">Kategorie wählen</option>' +
             db.categories.map(c => `<option value="${c.name}">${c.name}</option>`).join('');
         catSel.value = '';
     } else {
