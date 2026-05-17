@@ -149,6 +149,7 @@ class MealplannerAdapter extends utils.Adapter {
 
         await this.subscribeStatesAsync('cmd.*');
         await this.subscribeStatesAsync('week.*');
+        await this.subscribeStatesAsync('info.plan_json');
 
         this.scheduleMidnightUpdate();
 
@@ -235,7 +236,9 @@ class MealplannerAdapter extends utils.Adapter {
         if (!state || state.ack) return;
         const localId = id.replace(`${this.namespace}.`, '');
 
-        if (localId === 'cmd.suggest') {
+        if (localId === 'info.plan_json') {
+            await this.handlePlanJsonChange(state.val);
+        } else if (localId === 'cmd.suggest') {
             await this.handleSuggest();
         } else if (localId === 'cmd.export') {
             await this.handleExport();
@@ -313,6 +316,19 @@ class MealplannerAdapter extends utils.Adapter {
         await this.updateWeekStates();
         await this.setStateAsync('cmd.import', { val: '', ack: true });
         this.log.info(`Import: ${imported} Einträge importiert`);
+    }
+
+    async handlePlanJsonChange(val) {
+        try {
+            const planData = JSON.parse(val);
+            if (planData.current?.key) this.db.plan[planData.current.key] = planData.current.days || {};
+            if (planData.next?.key)    this.db.plan[planData.next.key]    = planData.next.days    || {};
+            this.saveDb();
+            await this.updateTodayStates();
+            await this.updateWeekStates();
+        } catch (e) {
+            this.log.error('plan_json parse failed: ' + e.message);
+        }
     }
 
     async handleWeekStateChange(localId, val) {
