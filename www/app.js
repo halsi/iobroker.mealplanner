@@ -28,9 +28,10 @@ function getState(id) {
 }
 
 async function loadAll() {
-    const [dbState, planState] = await Promise.all([
+    const [dbState, planState, settingsState] = await Promise.all([
         getState(ns + 'info.database'),
         getState(ns + 'info.plan_json'),
+        getState(ns + 'info.settings'),
     ]);
 
     if (dbState?.val) {
@@ -39,8 +40,34 @@ async function loadAll() {
     if (planState?.val) {
         try { plan = JSON.parse(planState.val); } catch (e) { console.error('[mp] plan parse', e); }
     }
+    if (settingsState?.val) {
+        try { applySettings(JSON.parse(settingsState.val)); } catch (e) { console.error('[mp] settings parse', e); }
+    }
 
     render();
+}
+
+function applySettings(s) {
+    if (!s) return;
+    const r = document.documentElement;
+    const w = s.widget || {};
+    const f = s.fonts  || {};
+    if (w.width)  r.style.setProperty('--mp-w', w.width  + 'px');
+    if (w.height) r.style.setProperty('--mp-h', w.height + 'px');
+    const map = {
+        kw_label:   ['--mp-fs-kw',   '--mp-c-kw'],
+        date_range: ['--mp-fs-dr',   '--mp-c-dr'],
+        col_header: ['--mp-fs-ch',   '--mp-c-ch'],
+        day_name:   ['--mp-fs-dn',   '--mp-c-dn'],
+        day_date:   ['--mp-fs-dd',   '--mp-c-dd'],
+        category:   ['--mp-fs-cat',  '--mp-c-cat'],
+        dish:       ['--mp-fs-dish', '--mp-c-dish'],
+        side:       ['--mp-fs-side', '--mp-c-side'],
+    };
+    for (const [key, [fsVar, cVar]] of Object.entries(map)) {
+        if (f[key]?.size)  r.style.setProperty(fsVar, f[key].size  + 'px');
+        if (f[key]?.color) r.style.setProperty(cVar,  f[key].color);
+    }
 }
 
 // ─── Date helpers ─────────────────────────────────────────────────────────────
