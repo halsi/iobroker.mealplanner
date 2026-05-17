@@ -25,6 +25,7 @@
         <div class="mp-tab" data-panel="mp-panel-dishes">Gerichte</div>
         <div class="mp-tab" data-panel="mp-panel-sides">Beilagen</div>
         <div class="mp-tab" data-panel="mp-panel-ie">Import/Export</div>
+        <div class="mp-tab" data-panel="mp-panel-settings">Einstellungen</div>
     </nav>
 
     <!-- ── Tab: Gerichte ──────────────────────────────────────────────────── -->
@@ -155,6 +156,52 @@
                         Leeren
                     </button>
                 </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ── Tab: Einstellungen ──────────────────────────────────────────────── -->
+    <div id="mp-panel-settings" class="mp-panel">
+
+        <div class="mp-ie-section">
+
+            <div class="mp-section">
+                <h3 class="mp-section-title">Widget-URL</h3>
+                <p style="color:#616161;margin:0 0 8px 0;font-size:13px">URL für den iFrame in VIS oder anderen Dashboards:</p>
+                <div id="mp-url-box" class="mp-url-box">
+                    <div class="mp-url-row"><span class="mp-url-label">Diese Woche:</span><code id="mp-url-current">—</code></div>
+                    <div class="mp-url-row"><span class="mp-url-label">Nächste Woche:</span><code id="mp-url-next">—</code></div>
+                </div>
+            </div>
+
+            <div class="mp-section">
+                <h3 class="mp-section-title">Widget-Größe</h3>
+                <table class="mp-settings-table">
+                    <tr><td>Breite</td><td><input type="number" id="mp-set-width" min="400" max="3840" step="10" value="1480"> px</td></tr>
+                    <tr><td>Höhe</td> <td><input type="number" id="mp-set-height" min="200" max="2160" step="10" value="650"> px</td></tr>
+                </table>
+            </div>
+
+            <div class="mp-section">
+                <h3 class="mp-section-title">Schriften</h3>
+                <table class="mp-settings-table mp-settings-fonts">
+                    <thead><tr><th>Element</th><th>Größe (px)</th><th>Farbe</th></tr></thead>
+                    <tbody>
+                        <tr><td>KW-Label</td>           <td><input type="number" id="mp-set-fs-kw_label"   min="8" max="72"></td><td><input type="color" id="mp-set-c-kw_label"></td></tr>
+                        <tr><td>Datumsbereich</td>       <td><input type="number" id="mp-set-fs-date_range" min="8" max="72"></td><td><input type="color" id="mp-set-c-date_range"></td></tr>
+                        <tr><td>Spalten-Header</td>      <td><input type="number" id="mp-set-fs-col_header" min="8" max="72"></td><td><input type="color" id="mp-set-c-col_header"></td></tr>
+                        <tr><td>Wochentag-Name</td>      <td><input type="number" id="mp-set-fs-day_name"   min="8" max="72"></td><td><input type="color" id="mp-set-c-day_name"></td></tr>
+                        <tr><td>Wochentag-Datum</td>     <td><input type="number" id="mp-set-fs-day_date"   min="8" max="72"></td><td><input type="color" id="mp-set-c-day_date"></td></tr>
+                        <tr><td>Kategorie-Text</td>      <td><input type="number" id="mp-set-fs-category"   min="8" max="72"></td><td><input type="color" id="mp-set-c-category"></td></tr>
+                        <tr><td>Gericht-Text</td>        <td><input type="number" id="mp-set-fs-dish"       min="8" max="72"></td><td><input type="color" id="mp-set-c-dish"></td></tr>
+                        <tr><td>Beilage-Text</td>        <td><input type="number" id="mp-set-fs-side"       min="8" max="72"></td><td><input type="color" id="mp-set-c-side"></td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="mp-toolbar">
+                <button class="mp-btn mp-btn-primary" onclick="mpSaveSettings()">Speichern</button>
             </div>
 
         </div>
