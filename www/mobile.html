@@ -302,6 +302,28 @@
         #add-name::placeholder { color: rgba(255,153,0,0.28); }
         #add-name:focus { border-color: rgba(255,153,0,0.5); }
 
+        #add-cat-row { margin-bottom: 12px; }
+
+        #add-cat {
+            width: 100%;
+            background: var(--c-surf2);
+            border: 1px solid rgba(255,153,0,0.2);
+            border-radius: 10px;
+            padding: 14px 16px;
+            font-size: 17px;
+            font-family: inherit;
+            color: var(--c-primary);
+            outline: none;
+            -webkit-appearance: none;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23FF9900' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 16px center;
+        }
+
+        #add-cat:focus { border-color: rgba(255,153,0,0.5); }
+        #add-cat option { background: #1c1c1c; color: #FF9900; }
+
         #add-footer {
             padding: 12px 16px;
             padding-bottom: calc(12px + var(--safe-bottom));
@@ -377,6 +399,11 @@
     <div class="sheet-handle"></div>
     <div id="add-title" class="sheet-title"></div>
     <div id="add-body">
+        <div id="add-cat-row">
+            <select id="add-cat">
+                <option value="">— Kategorie wählen —</option>
+            </select>
+        </div>
         <input type="text" id="add-name" placeholder="Name eingeben…"
                autocomplete="off" autocorrect="off" autocapitalize="sentences">
     </div>
@@ -685,6 +712,18 @@ function openAddSheet(type) {
     _addType = type;
     document.getElementById('add-title').textContent = type === 'dish' ? 'Neues Gericht' : 'Neue Beilage';
     document.getElementById('add-name').value = '';
+
+    const catRow = document.getElementById('add-cat-row');
+    const catSel = document.getElementById('add-cat');
+    if (type === 'dish') {
+        catRow.style.display = 'block';
+        catSel.innerHTML = '<option value="">— Kategorie wählen —</option>' +
+            db.categories.map(c => `<option value="${c.name}">${c.name}</option>`).join('');
+        catSel.value = '';
+    } else {
+        catRow.style.display = 'none';
+    }
+
     openSheet('add-sheet');
     setTimeout(() => document.getElementById('add-name').focus(), 320);
 }
@@ -693,8 +732,15 @@ async function doAdd() {
     const name = document.getElementById('add-name').value.trim();
     if (!name) return;
 
+    let payload = { name };
+    if (_addType === 'dish') {
+        const cat = document.getElementById('add-cat').value;
+        if (!cat) { showToast('Bitte Kategorie wählen'); return; }
+        payload.kategorie = cat;
+    }
+
     const cmd = _addType === 'dish' ? 'saveDish' : 'saveSide';
-    const res = await sendTo(cmd, { name });
+    const res = await sendTo(cmd, payload);
     if (res?.error) { showToast('Fehler: ' + res.error); return; }
 
     const dbS = await getState(ns + 'info.database');
