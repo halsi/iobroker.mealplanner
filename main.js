@@ -130,6 +130,19 @@ class MealplannerAdapter extends utils.Adapter {
         this.dbPath = this.getDbPath();
         this.loadDb();
 
+        // Sync plan from existing ioBroker state into db.plan before overwriting it.
+        // This preserves plan data that was saved by the widget but not yet written to
+        // database.json (e.g. after a reinstall without the subscription fix running).
+        try {
+            const existing = await this.getStateAsync('info.plan_json');
+            if (existing && existing.val) {
+                const pd = JSON.parse(existing.val);
+                if (pd.current?.key) this.db.plan[pd.current.key] = pd.current.days || {};
+                if (pd.next?.key)    this.db.plan[pd.next.key]    = pd.next.days    || {};
+                fs.writeFileSync(this.dbPath, JSON.stringify(this.db, null, 2), 'utf8');
+            }
+        } catch (e) { this.log.warn('[mp] plan state sync: ' + e.message); }
+
         const { kw, nextKW } = this.getCurrentKWInfo();
         await this.setStateAsync('info.current_kw', { val: kw, ack: true });
         await this.setStateAsync('info.next_kw', { val: nextKW, ack: true });
