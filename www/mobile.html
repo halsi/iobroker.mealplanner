@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Essensplan</title>
+    <style>
+        :root {
+            --c-bg:      #000000;
+            --c-surface: #111111;
+            --c-surf2:   #1c1c1c;
+            --c-primary: #FF9900;
+            --c-light:   #FFCC99;
+            --c-muted:   rgba(255,153,0,0.25);
+            --c-border:  rgba(255,153,0,0.12);
+            --safe-top:    env(safe-area-inset-top,    0px);
+            --safe-bottom: env(safe-area-inset-bottom, 0px);
+        }
+
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html, body {
+            background: var(--c-bg);
+            color: var(--c-primary);
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        /* ── App shell ── */
+        #app {
+            display: flex;
+            flex-direction: column;
+            height: 100dvh;
+        }
+
+        /* ── Tabs ── */
+        #tabs {
+            display: flex;
+            background: var(--c-surface);
+            border-bottom: 1px solid var(--c-border);
+            padding-top: var(--safe-top);
+            flex-shrink: 0;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 14px 8px;
+            background: none;
+            border: none;
+            border-bottom: 2px solid transparent;
+            color: rgba(255,153,0,0.4);
+            font-size: 15px;
+            font-family: inherit;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        .tab.active {
+            color: var(--c-primary);
+            border-bottom-color: var(--c-primary);
+        }
+
+        /* ── KW bar ── */
+        #kw-bar {
+            padding: 7px 16px;
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--c-light);
+            background: var(--c-surface);
+            border-bottom: 1px solid var(--c-border);
+            flex-shrink: 0;
+        }
+
+        /* ── Day list ── */
+        #day-list {
+            flex: 1;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            padding: 10px 12px;
+            padding-bottom: calc(72px + var(--safe-bottom));
+        }
+
+        /* ── Day card ── */
+        .day-card {
+            background: var(--c-surface);
+            border: 1px solid var(--c-border);
+            border-radius: 12px;
+            margin-bottom: 8px;
+            overflow: hidden;
+        }
+
+        .day-card.today { border-color: rgba(255,153,0,0.38); }
+
+        .day-header {
+            padding: 9px 14px 7px;
+            border-bottom: 1px solid var(--c-border);
+        }
+
+        .day-name {
+            font-size: 14px;
+            font-weight: 600;
+            color: rgba(255,204,153,0.8);
+        }
+
+        .day-card.today .day-name { color: var(--c-primary); }
+
+        .day-date {
+            font-size: 11px;
+            color: rgba(255,153,0,0.4);
+            margin-top: 1px;
+        }
+
+        /* ── Slot rows ── */
+        .slot-row {
+            display: flex;
+            align-items: center;
+            padding: 13px 14px;
+            border-bottom: 1px solid var(--c-border);
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .slot-row:last-child { border-bottom: none; }
+        .slot-row:active { background: var(--c-surf2); }
+
+        .slot-label {
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 0.07em;
+            text-transform: uppercase;
+            color: rgba(255,153,0,0.35);
+            width: 68px;
+            flex-shrink: 0;
+        }
+
+        .slot-value {
+            flex: 1;
+            font-size: 16px;
+            color: var(--c-primary);
+            line-height: 1.2;
+        }
+
+        .slot-value.empty { color: rgba(255,153,0,0.22); }
+
+        .slot-arrow {
+            font-size: 16px;
+            color: rgba(255,153,0,0.25);
+            margin-left: 6px;
+        }
+
+        .cat-dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-right: 6px;
+            vertical-align: middle;
+            flex-shrink: 0;
+        }
+
+        /* ── FAB bar ── */
+        #fab-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            display: flex;
+            gap: 10px;
+            padding: 10px 14px;
+            padding-bottom: calc(10px + var(--safe-bottom));
+            background: var(--c-surface);
+            border-top: 1px solid var(--c-border);
+        }
+
+        .fab-btn {
+            flex: 1;
+            padding: 13px;
+            background: rgba(255,153,0,0.1);
+            border: 1px solid rgba(255,153,0,0.28);
+            border-radius: 10px;
+            color: var(--c-primary);
+            font-size: 15px;
+            font-family: inherit;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .fab-btn:active { background: rgba(255,153,0,0.2); }
+
+        /* ── Backdrop ── */
+        #backdrop {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.55);
+            z-index: 100;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.22s;
+        }
+
+        #backdrop.visible {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        /* ── Bottom sheets ── */
+        .sheet {
+            position: fixed;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--c-surface);
+            border-radius: 16px 16px 0 0;
+            z-index: 200;
+            transform: translateY(100%);
+            transition: transform 0.26s cubic-bezier(0.32, 0.72, 0, 1);
+            max-height: 80dvh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sheet.open { transform: translateY(0); }
+
+        .sheet-handle {
+            width: 36px;
+            height: 4px;
+            background: rgba(255,153,0,0.2);
+            border-radius: 2px;
+            margin: 10px auto 0;
+            flex-shrink: 0;
+        }
+
+        .sheet-title {
+            padding: 12px 16px 10px;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 0.07em;
+            text-transform: uppercase;
+            color: var(--c-light);
+            border-bottom: 1px solid var(--c-border);
+            flex-shrink: 0;
+        }
+
+        /* ── Picker list ── */
+        #picker-list {
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            flex: 1;
+        }
+
+        .pick-opt {
+            display: block;
+            width: 100%;
+            padding: 15px 16px;
+            background: none;
+            border: none;
+            border-bottom: 1px solid var(--c-border);
+            color: var(--c-primary);
+            font-size: 17px;
+            font-family: inherit;
+            text-align: left;
+            cursor: pointer;
+        }
+
+        .pick-opt:active { background: var(--c-surf2); }
+
+        .pick-opt.pick-clear {
+            color: rgba(255,153,0,0.38);
+            font-size: 15px;
+            border-top: 1px solid var(--c-border);
+            border-bottom: none;
+            padding-bottom: calc(15px + var(--safe-bottom));
+        }
+
+        .pick-empty {
+            padding: 20px 16px;
+            color: rgba(255,153,0,0.32);
+            font-size: 15px;
+        }
+
+        /* ── Add sheet ── */
+        #add-body {
+            padding: 16px;
+            flex: 1;
+        }
+
+        #add-name {
+            width: 100%;
+            background: var(--c-surf2);
+            border: 1px solid rgba(255,153,0,0.2);
+            border-radius: 10px;
+            padding: 14px 16px;
+            font-size: 17px;
+            font-family: inherit;
+            color: var(--c-primary);
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        #add-name::placeholder { color: rgba(255,153,0,0.28); }
+        #add-name:focus { border-color: rgba(255,153,0,0.5); }
+
+        #add-footer {
+            padding: 12px 16px;
+            padding-bottom: calc(12px + var(--safe-bottom));
+            flex-shrink: 0;
+        }
+
+        #add-save {
+            width: 100%;
+            padding: 15px;
+            background: var(--c-primary);
+            border: none;
+            border-radius: 10px;
+            color: #000;
+            font-size: 17px;
+            font-family: inherit;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        #add-save:active { opacity: 0.82; }
+
+        /* ── Toast ── */
+        #toast {
+            position: fixed;
+            bottom: calc(80px + var(--safe-bottom));
+            left: 50%;
+            transform: translateX(-50%) translateY(12px);
+            background: rgba(28,28,28,0.96);
+            color: var(--c-light);
+            padding: 9px 18px;
+            border-radius: 20px;
+            font-size: 14px;
+            white-space: nowrap;
+            opacity: 0;
+            transition: opacity 0.18s, transform 0.18s;
+            pointer-events: none;
+            z-index: 300;
+        }
+
+        #toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+    </style>
+</head>
+<body>
+
+<div id="app">
+    <div id="tabs">
+        <button class="tab active" data-week="current">Diese Woche</button>
+        <button class="tab"        data-week="next">Nächste Woche</button>
+    </div>
+    <div id="kw-bar">Lade…</div>
+    <div id="day-list"></div>
+</div>
+
+<div id="fab-bar">
+    <button class="fab-btn" id="btn-add-dish">+ Gericht</button>
+    <button class="fab-btn" id="btn-add-side">+ Beilage</button>
+</div>
+
+<div id="backdrop"></div>
+
+<!-- Picker bottom sheet -->
+<div id="picker-sheet" class="sheet">
+    <div class="sheet-handle"></div>
+    <div id="picker-title" class="sheet-title"></div>
+    <div id="picker-list"></div>
+</div>
+
+<!-- Add bottom sheet -->
+<div id="add-sheet" class="sheet">
+    <div class="sheet-handle"></div>
+    <div id="add-title" class="sheet-title"></div>
+    <div id="add-body">
+        <input type="text" id="add-name" placeholder="Name eingeben…"
+               autocomplete="off" autocorrect="off" autocapitalize="sentences">
+    </div>
+    <div id="add-footer">
+        <button id="add-save">Speichern</button>
+    </div>
+</div>
+
+<div id="toast"></div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+'use strict';
+
+const DAYS = ['Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag','Sonntag'];
+
+let db         = { dishes: [], sides: [], categories: [] };
+let plan       = { current: null, next: null };
+let socket, ns, instance;
+let activeWeek = 'current';
+let _addType;
+
+// ─── Init ─────────────────────────────────────────────────────────────────────
+
+window.addEventListener('DOMContentLoaded', () => {
+    const p = new URLSearchParams(location.search);
+    instance = p.get('instance') || '0';
+    ns = 'mealplanner.' + instance + '.';
+
+    if (typeof io !== 'undefined') {
+        socket = io.connect();
+        socket.on('connect', loadAll);
+        socket.on('disconnect', () => console.warn('[mp] disconnected'));
+    } else {
+        socket = { emit: (_e, ...a) => { const cb = a[a.length-1]; if (typeof cb === 'function') cb(null, null); } };
+        loadAll();
+    }
+
+    document.querySelectorAll('.tab').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            btn.classList.add('active');
+            activeWeek = btn.dataset.week;
+            render();
+        });
+    });
+
+    document.getElementById('btn-add-dish').addEventListener('click', () => openAddSheet('dish'));
+    document.getElementById('btn-add-side').addEventListener('click', () => openAddSheet('side'));
+    document.getElementById('backdrop').addEventListener('click', closeSheets);
+    document.getElementById('add-save').addEventListener('click', doAdd);
+    document.getElementById('add-name').addEventListener('keydown', e => { if (e.key === 'Enter') doAdd(); });
+});
+
+// ─── Data ─────────────────────────────────────────────────────────────────────
+
+function getState(id) {
+    return new Promise(r => socket.emit('getState', id, (_e, s) => r(s)));
+}
+
+function sendTo(cmd, msg) {
+    return new Promise(r => socket.emit('sendTo', 'mealplanner.' + instance, cmd, msg, r));
+}
+
+async function loadAll() {
+    const [dbS, planS, setS] = await Promise.all([
+        getState(ns + 'info.database'),
+        getState(ns + 'info.plan_json'),
+        getState(ns + 'info.settings'),
+    ]);
+    if (dbS?.val)  try { Object.assign(db, JSON.parse(dbS.val)); }  catch(e) {}
+    if (planS?.val) try { plan = JSON.parse(planS.val); }            catch(e) {}
+    if (setS?.val)  try { applySettings(JSON.parse(setS.val)); }     catch(e) {}
+    render();
+}
+
+function applySettings(s) {
+    if (!s) return;
+    const r = document.documentElement;
+    const p = s.picker || {};
+    if (p.bg) r.style.setProperty('--c-surf2', p.bg);
+}
+
+// ─── Date helpers ─────────────────────────────────────────────────────────────
+
+function mondayOfKW(kw, year) {
+    const jan4 = new Date(year, 0, 4);
+    const dow  = (jan4.getDay() + 6) % 7;
+    const m1   = new Date(jan4);
+    m1.setDate(jan4.getDate() - dow);
+    const res  = new Date(m1);
+    res.setDate(m1.getDate() + (kw - 1) * 7);
+    return res;
+}
+
+function yearForKW(kw) {
+    const now = new Date(), y = now.getFullYear();
+    if (kw === 1  && now.getMonth() === 11) return y + 1;
+    if (kw >= 52  && now.getMonth() === 0)  return y - 1;
+    return y;
+}
+
+function fmt(d, long) {
+    return d.toLocaleDateString('de-AT', long
+        ? { day:'2-digit', month:'2-digit', year:'numeric' }
+        : { day:'2-digit', month:'2-digit' });
+}
+
+function todayName() {
+    return ['Sonntag','Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag'][new Date().getDay()];
+}
+
+// ─── Render ───────────────────────────────────────────────────────────────────
+
+function render() {
+    const wd   = plan[activeWeek];
+    const kw   = wd?.kw   || null;
+    const days = wd?.days || {};
+
+    const bar = document.getElementById('kw-bar');
+    if (kw) {
+        const yr  = yearForKW(kw);
+        const mon = mondayOfKW(kw, yr);
+        const sun = new Date(mon.getTime() + 6 * 86400000);
+        bar.textContent = `KW ${kw}  ·  ${fmt(mon, true)} – ${fmt(sun, true)}`;
+    } else {
+        bar.textContent = 'Noch kein Wochenplan';
+    }
+
+    const today   = todayName();
+    const monDate = kw ? mondayOfKW(kw, yearForKW(kw)) : null;
+    const list    = document.getElementById('day-list');
+    list.innerHTML = '';
+
+    DAYS.forEach((day, i) => {
+        const entry   = days[day] || {};
+        const dish    = db.dishes.find(d => d.id === entry.hauptspeise_id) || null;
+        const side    = db.sides.find(s => s.id === entry.beilage_id)      || null;
+        const catName = entry.kategorie || dish?.kategorie || '';
+        const catObj  = db.categories.find(c => c.name === catName) || null;
+        const isToday = activeWeek === 'current' && day === today;
+
+        const card = document.createElement('div');
+        card.className = 'day-card' + (isToday ? ' today' : '');
+
+        // Header
+        const hdr = document.createElement('div');
+        hdr.className = 'day-header';
+        const dn = document.createElement('div');
+        dn.className = 'day-name';
+        dn.textContent = day;
+        hdr.appendChild(dn);
+        if (monDate) {
+            const dd = document.createElement('div');
+            dd.className = 'day-date';
+            dd.textContent = fmt(new Date(monDate.getTime() + i * 86400000));
+            hdr.appendChild(dd);
+        }
+        card.appendChild(hdr);
+
+        // Category slot
+        let catHtml = null;
+        if (catName) {
+            catHtml = `<span class="cat-dot" style="background:${catObj?.color || '#888'}"></span>${catName}`;
+        }
+        card.appendChild(makeSlot('Kategorie', 'cat', day, catHtml, catObj?.color));
+
+        // Dish slot
+        card.appendChild(makeSlot('Gericht', 'dish', day, dish?.name || null, null));
+
+        // Side slot
+        card.appendChild(makeSlot('Beilage', 'side', day, side?.name || null, null));
+
+        list.appendChild(card);
+    });
+}
+
+function makeSlot(label, type, day, value, color) {
+    const row = document.createElement('div');
+    row.className = 'slot-row';
+
+    const lbl = document.createElement('span');
+    lbl.className = 'slot-label';
+    lbl.textContent = label;
+
+    const val = document.createElement('span');
+    val.className = 'slot-value' + (value ? '' : ' empty');
+    if (value) {
+        val.innerHTML = value;
+        if (color) val.style.color = color;
+    } else {
+        val.textContent = '—';
+    }
+
+    const arr = document.createElement('span');
+    arr.className = 'slot-arrow';
+    arr.textContent = '›';
+
+    row.appendChild(lbl);
+    row.appendChild(val);
+    row.appendChild(arr);
+    row.addEventListener('click', () => openPicker(type, day));
+    return row;
+}
+
+// ─── Plan helpers ─────────────────────────────────────────────────────────────
+
+function dayEntry(day) {
+    const wk = activeWeek;
+    if (!plan[wk])           plan[wk] = { days: {} };
+    if (!plan[wk].days)      plan[wk].days = {};
+    if (!plan[wk].days[day]) plan[wk].days[day] = {};
+    return plan[wk].days[day];
+}
+
+function savePlan() {
+    socket.emit('setState', ns + 'info.plan_json', { val: JSON.stringify(plan), ack: false }, () => {});
+}
+
+// ─── Picker sheet ─────────────────────────────────────────────────────────────
+
+function openPicker(type, day) {
+    const entry   = (plan[activeWeek]?.days || {})[day] || {};
+    const catName = entry.kategorie || '';
+    const catObj  = db.categories.find(c => c.name === catName);
+
+    const title = document.getElementById('picker-title');
+    const list  = document.getElementById('picker-list');
+    list.innerHTML = '';
+
+    let items = [];
+
+    if (type === 'cat') {
+        title.textContent = 'Kategorie';
+        items = db.categories.map(c => ({
+            label: c.name,
+            color: c.color,
+            action() {
+                const e = dayEntry(day);
+                e.kategorie = c.name;
+                if (e.hauptspeise_id) {
+                    const d = db.dishes.find(x => x.id === e.hauptspeise_id);
+                    if (d && d.kategorie !== c.name) e.hauptspeise_id = '';
+                }
+                savePlan(); closeSheets(); render();
+            }
+        }));
+    } else if (type === 'dish') {
+        title.textContent = catName ? `Gericht — ${catName}` : 'Gericht';
+        const pool = catName ? db.dishes.filter(d => d.kategorie === catName) : db.dishes;
+        items = pool.map(d => ({
+            label: d.name,
+            color: catObj?.color || null,
+            action() {
+                const e = dayEntry(day);
+                e.hauptspeise_id = d.id;
+                if (!e.kategorie && d.kategorie) e.kategorie = d.kategorie;
+                savePlan(); closeSheets(); render();
+            }
+        }));
+    } else {
+        title.textContent = 'Beilage';
+        items = db.sides.map(s => ({
+            label: s.name,
+            action() {
+                const e = dayEntry(day);
+                e.beilage_id = s.id;
+                savePlan(); closeSheets(); render();
+            }
+        }));
+    }
+
+    if (!items.length) {
+        const empty = document.createElement('div');
+        empty.className = 'pick-empty';
+        empty.textContent = 'Keine Einträge vorhanden';
+        list.appendChild(empty);
+    } else {
+        items.forEach(item => {
+            const btn = document.createElement('button');
+            btn.className = 'pick-opt';
+            btn.textContent = item.label;
+            if (item.color) btn.style.color = item.color;
+            btn.addEventListener('click', item.action);
+            list.appendChild(btn);
+        });
+    }
+
+    const clear = document.createElement('button');
+    clear.className = 'pick-opt pick-clear';
+    clear.textContent = '— löschen —';
+    clear.addEventListener('click', () => {
+        const e = dayEntry(day);
+        if (type === 'cat')  delete e.kategorie;
+        if (type === 'dish') e.hauptspeise_id = '';
+        if (type === 'side') e.beilage_id = '';
+        savePlan(); closeSheets(); render();
+    });
+    list.appendChild(clear);
+
+    openSheet('picker-sheet');
+}
+
+// ─── Add sheet ────────────────────────────────────────────────────────────────
+
+function openAddSheet(type) {
+    _addType = type;
+    document.getElementById('add-title').textContent = type === 'dish' ? 'Neues Gericht' : 'Neue Beilage';
+    document.getElementById('add-name').value = '';
+    openSheet('add-sheet');
+    setTimeout(() => document.getElementById('add-name').focus(), 320);
+}
+
+async function doAdd() {
+    const name = document.getElementById('add-name').value.trim();
+    if (!name) return;
+
+    const cmd = _addType === 'dish' ? 'saveDish' : 'saveSide';
+    const res = await sendTo(cmd, { name });
+    if (res?.error) { showToast('Fehler: ' + res.error); return; }
+
+    const dbS = await getState(ns + 'info.database');
+    if (dbS?.val) try { Object.assign(db, JSON.parse(dbS.val)); } catch(e) {}
+
+    closeSheets();
+    showToast((_addType === 'dish' ? 'Gericht' : 'Beilage') + ' hinzugefügt');
+}
+
+// ─── Sheet helpers ─────────────────────────────────────────────────────────────
+
+function openSheet(id) {
+    document.getElementById('backdrop').classList.add('visible');
+    document.getElementById(id).classList.add('open');
+}
+
+function closeSheets() {
+    document.getElementById('backdrop').classList.remove('visible');
+    document.querySelectorAll('.sheet').forEach(s => s.classList.remove('open'));
+}
+
+// ─── Toast ────────────────────────────────────────────────────────────────────
+
+let _toastTimer;
+function showToast(msg) {
+    const el = document.getElementById('toast');
+    el.textContent = msg;
+    el.classList.add('show');
+    clearTimeout(_toastTimer);
+    _toastTimer = setTimeout(() => el.classList.remove('show'), 2400);
+}
+</script>
+</body>
+</html>
