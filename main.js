@@ -139,6 +139,11 @@ class MealplannerAdapter extends utils.Adapter {
             val: JSON.stringify({ dishes: this.db.dishes, sides: this.db.sides, categories: this.db.categories }),
             ack: true
         });
+        await this.setObjectNotExistsAsync('info.settings', {
+            type: 'state',
+            common: { name: 'Widget Settings', type: 'string', role: 'json', read: true, write: false },
+            native: {},
+        });
         await this.setStateAsync('info.settings', {
             val: JSON.stringify(this.db.settings),
             ack: true
