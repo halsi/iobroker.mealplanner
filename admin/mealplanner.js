@@ -440,6 +440,7 @@ async function mpLoadSettings() {
     const s = (res && res.result) || {};
     const w = s.widget || {};
     const f = s.fonts  || {};
+    const p = s.picker || {};
     document.getElementById('mp-set-width').value  = w.width  || 1480;
     document.getElementById('mp-set-height').value = w.height || 650;
     for (const key of FONT_KEYS) {
@@ -449,6 +450,10 @@ async function mpLoadSettings() {
         if (fsEl) fsEl.value = el.size  || '';
         if (cEl)  cEl.value  = el.color || '#FF9900';
     }
+    const pickerFsEl = document.getElementById('mp-set-picker-fs');
+    const pickerBgEl = document.getElementById('mp-set-picker-bg');
+    if (pickerFsEl) pickerFsEl.value = p.fs || 16;
+    if (pickerBgEl) pickerBgEl.value = p.bg || '#1c1c1c';
     await mpLoadWidgetUrl();
 }
 
@@ -474,7 +479,11 @@ async function mpSaveSettings() {
             width:  parseInt(document.getElementById('mp-set-width').value)  || 1480,
             height: parseInt(document.getElementById('mp-set-height').value) || 650,
         },
-        fonts: {}
+        fonts: {},
+        picker: {
+            fs: parseInt(document.getElementById('mp-set-picker-fs').value) || 16,
+            bg: document.getElementById('mp-set-picker-bg').value || '#1c1c1c',
+        },
     };
     for (const key of FONT_KEYS) {
         const colorEl = document.getElementById('mp-set-c-' + key);
@@ -493,19 +502,8 @@ async function mpSaveSettings() {
 async function mpSortAndSave() {
     const res = await mpSendTo('sortAndSave', {});
     if (res && res.error) { mpToast('Fehler: ' + res.error, true); return; }
-    const [dishRes, sideRes, catRes] = await Promise.all([
-        mpSendTo('getDishes', {}),
-        mpSendTo('getSides', {}),
-        mpSendTo('getCategories', {}),
-    ]);
-    if (dishRes && dishRes.result) mp.dishes     = dishRes.result;
-    if (sideRes && sideRes.result) mp.sides      = sideRes.result;
-    if (catRes  && catRes.result)  mp.categories = catRes.result;
-    mpRenderDishes();
-    mpRenderSides();
-    mpRenderCategories();
-    mpPopulateCatSelect();
-    mpToast('Gespeichert & alphabetisch sortiert');
+    window.parent.postMessage('close', '*');
+    window.close();
 }
 
 // ─── Init ─────────────────────────────────────────────────────────────────────

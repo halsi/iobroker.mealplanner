@@ -24,7 +24,8 @@ const DEFAULT_SETTINGS = {
         category:   { size: 17, color: '#FF9900' },
         dish:       { size: 17, color: '#FF9900' },
         side:       { size: 17, color: '#FF9900' },
-    }
+    },
+    picker: { bg: '#1c1c1c', fs: 16 },
 };
 
 class MealplannerAdapter extends utils.Adapter {

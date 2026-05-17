@@ -16,7 +16,7 @@
 
     <!-- Toolbar -->
     <div class="mp-global-toolbar">
-        <button class="mp-btn mp-btn-primary" onclick="mpSortAndSave()">&#x1F4BE; Speichern &amp; Sortieren</button>
+        <button class="mp-btn mp-btn-primary" onclick="mpSortAndSave()">&#x1F4BE; Speichern &amp; Schlie&szlig;en</button>
     </div>
 
     <!-- Tab bar -->
@@ -196,6 +196,17 @@
                         <tr><td>Kategorie-Text</td>      <td><input type="number" id="mp-set-fs-category"   min="8" max="72"></td><td style="color:#9e9e9e;font-size:12px">aus Kategorie-Farbe</td></tr>
                         <tr><td>Gericht-Text</td>        <td><input type="number" id="mp-set-fs-dish"       min="8" max="72"></td><td><input type="color" id="mp-set-c-dish"></td></tr>
                         <tr><td>Beilage-Text</td>        <td><input type="number" id="mp-set-fs-side"       min="8" max="72"></td><td><input type="color" id="mp-set-c-side"></td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="mp-section">
+                <h3 class="mp-section-title">Auswahl-Popup (Picker)</h3>
+                <table class="mp-settings-table mp-settings-fonts">
+                    <thead><tr><th>Element</th><th>Größe (px)</th><th>Farbe</th></tr></thead>
+                    <tbody>
+                        <tr><td>Schriftgröße</td>        <td><input type="number" id="mp-set-picker-fs" min="8" max="72"></td><td style="color:#9e9e9e;font-size:12px">aus Kategorie-Farbe</td></tr>
+                        <tr><td>Hintergrundfarbe</td>     <td style="color:#9e9e9e;font-size:12px">—</td>                     <td><input type="color" id="mp-set-picker-bg"></td></tr>
                     </tbody>
                 </table>
             </div>

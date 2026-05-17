@@ -52,8 +52,11 @@ function applySettings(s) {
     const r = document.documentElement;
     const w = s.widget || {};
     const f = s.fonts  || {};
+    const p = s.picker || {};
     if (w.width)  r.style.setProperty('--mp-w', w.width  + 'px');
     if (w.height) r.style.setProperty('--mp-h', w.height + 'px');
+    if (p.bg) r.style.setProperty('--mp-picker-bg', p.bg);
+    if (p.fs) r.style.setProperty('--mp-picker-fs', p.fs + 'px');
     const map = {
         kw_label:   ['--mp-fs-kw',   '--mp-c-kw'],
         date_range: ['--mp-fs-dr',   '--mp-c-dr'],
@@ -209,6 +212,7 @@ function render() {
 
 let _pickerDay = null;
 let _pickerWeekKey = null;
+let _pickerAnchorRect = null;
 
 function hidePicker() {
     const el = document.getElementById('mp-picker');
@@ -226,11 +230,27 @@ function openPicker(e) {
         document.body.appendChild(el);
     }
     while (el.firstChild) el.removeChild(el.firstChild);
-    const rect = e.currentTarget.getBoundingClientRect();
-    el.style.left    = rect.left + 'px';
-    el.style.top     = (rect.bottom + 4) + 'px';
-    el.style.display = 'block';
+    _pickerAnchorRect = e.currentTarget.getBoundingClientRect();
+    el.style.left     = _pickerAnchorRect.left + 'px';
+    el.style.top      = (_pickerAnchorRect.bottom + 4) + 'px';
+    el.style.maxHeight = '420px';
+    el.style.display  = 'block';
     return el;
+}
+
+function adjustPickerPosition() {
+    const el = document.getElementById('mp-picker');
+    if (!el || !_pickerAnchorRect) return;
+    const rect      = _pickerAnchorRect;
+    const vh        = window.innerHeight;
+    const pickerH   = el.offsetHeight;
+    const spaceBelow = vh - rect.bottom - 4;
+    if (pickerH > spaceBelow && rect.top > pickerH) {
+        el.style.top       = (rect.top - pickerH - 4) + 'px';
+        el.style.maxHeight = (rect.top - 8) + 'px';
+    } else if (pickerH > spaceBelow) {
+        el.style.maxHeight = Math.max(80, spaceBelow) + 'px';
+    }
 }
 
 function pickerBtn(label, color, onClick) {
@@ -305,6 +325,7 @@ function openCatPicker(e, day) {
         savePlan();
         render();
     }));
+    adjustPickerPosition();
 }
 
 // ─── Dish picker ──────────────────────────────────────────────────────────────
@@ -341,6 +362,7 @@ function openDishPicker(e, day) {
         savePlan();
         render();
     }));
+    adjustPickerPosition();
 }
 
 // ─── Side picker ──────────────────────────────────────────────────────────────
@@ -369,4 +391,5 @@ function openSidePicker(e, day) {
         savePlan();
         render();
     }));
+    adjustPickerPosition();
 }

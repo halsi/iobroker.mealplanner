@@ -9,6 +9,8 @@
     --mp-fs-cat:  17px;  --mp-c-cat:  #FF9900;
     --mp-fs-dish: 17px;  --mp-c-dish: #FF9900;
     --mp-fs-side: 17px;  --mp-c-side: #FF9900;
+    --mp-picker-bg: #1c1c1c;
+    --mp-picker-fs: 16px;
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -156,7 +158,7 @@ td.col-cat:hover { background: rgba(255,153,0,.08); }
 .mp-picker {
     display: none;
     position: fixed;
-    background: #1c1c1c;
+    background: var(--mp-picker-bg);
     border: 1px solid rgba(255,153,0,.35);
     border-radius: 6px;
     padding: 4px;
@@ -190,7 +192,7 @@ td.col-cat:hover { background: rgba(255,153,0,.08); }
     padding: 9px 16px;
     cursor: pointer;
     border-radius: 4px;
-    font-size: 16px;
+    font-size: var(--mp-picker-fs);
     font-family: inherit;
     text-align: left;
     border: none;
