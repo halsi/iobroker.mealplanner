@@ -553,16 +553,18 @@ function render() {
         // Dish slot
         card.appendChild(makeSlot('Gericht', 'dish', day, dish?.name || null, null));
 
-        // Side slot
-        card.appendChild(makeSlot('Beilage', 'side', day, side?.name || null, null));
+        // Side slot — disabled when Extern
+        const isExtern = catName === 'Extern';
+        card.appendChild(makeSlot('Beilage', 'side', day, isExtern ? null : (side?.name || null), null, isExtern));
 
         list.appendChild(card);
     });
 }
 
-function makeSlot(label, type, day, value, color) {
+function makeSlot(label, type, day, value, color, disabled) {
     const row = document.createElement('div');
     row.className = 'slot-row';
+    if (disabled) row.style.opacity = '0.35';
 
     const lbl = document.createElement('span');
     lbl.className = 'slot-label';
@@ -579,12 +581,12 @@ function makeSlot(label, type, day, value, color) {
 
     const arr = document.createElement('span');
     arr.className = 'slot-arrow';
-    arr.textContent = '›';
+    arr.textContent = disabled ? '' : '›';
 
     row.appendChild(lbl);
     row.appendChild(val);
     row.appendChild(arr);
-    row.addEventListener('click', () => openPicker(type, day));
+    if (!disabled) row.addEventListener('click', () => openPicker(type, day));
     return row;
 }
 
@@ -627,6 +629,7 @@ function openPicker(type, day) {
                     const d = db.dishes.find(x => x.id === e.hauptspeise_id);
                     if (d && d.kategorie !== c.name) e.hauptspeise_id = '';
                 }
+                if (c.name === 'Extern') e.beilage_id = '';
                 savePlan(); closeSheets(); render();
             }
         }));

@@ -188,9 +188,10 @@ function render() {
         tdMain.addEventListener('click', e => { e.stopPropagation(); openDishPicker(e, day); });
 
         // Side cell
+        const isExtern = catName === 'Extern';
         const tdSide = document.createElement('td');
-        tdSide.className = 'col-side col-pick';
-        if (side) {
+        tdSide.className = 'col-side' + (isExtern ? '' : ' col-pick');
+        if (side && !isExtern) {
             tdSide.textContent = side.name;
         } else {
             const empty = document.createElement('span');
@@ -198,7 +199,9 @@ function render() {
             empty.textContent = '—';
             tdSide.appendChild(empty);
         }
-        tdSide.addEventListener('click', e => { e.stopPropagation(); openSidePicker(e, day); });
+        if (!isExtern) {
+            tdSide.addEventListener('click', e => { e.stopPropagation(); openSidePicker(e, day); });
+        }
 
         tr.appendChild(tdDay);
         tr.appendChild(tdCat);
@@ -314,6 +317,7 @@ function openCatPicker(e, day) {
                     const dish = db.dishes.find(d => d.id === entry.hauptspeise_id);
                     if (dish && dish.kategorie !== c.name) entry.hauptspeise_id = '';
                 }
+                if (c.name === 'Extern') entry.beilage_id = '';
                 savePlan();
                 render();
             }));
