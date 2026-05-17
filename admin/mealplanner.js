@@ -477,9 +477,10 @@ async function mpSaveSettings() {
         fonts: {}
     };
     for (const key of FONT_KEYS) {
+        const colorEl = document.getElementById('mp-set-c-' + key);
         settings.fonts[key] = {
             size:  parseInt(document.getElementById('mp-set-fs-' + key).value) || 17,
-            color: document.getElementById('mp-set-c-' + key).value || '#FF9900',
+            ...(colorEl ? { color: colorEl.value || '#FF9900' } : {}),
         };
     }
     const res = await mpSendTo('saveSettings', settings);
